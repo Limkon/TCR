@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聊天室</title>
+    <!-- 移除 favicon，避免 Mixed Content -->
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; display: flex; height: 100vh; overflow: hidden; }
+        #left { width: 200px; background: #f5f5f5; padding: 15px; border-right: 1px solid #ccc; overflow-y: auto; }
+        #right { flex: 1; display: flex; flex-direction: column; }
+        #chat { flex: 1; padding: 15px; overflow-y: auto; background: #fff; }
+        #chat p { margin-bottom: 10px; padding: 8px; background: #e9ecef; border-radius: 5px; max-width: 70%; }
+        #input-area { padding: 10px; background: #f5f5f5; border-top: 1px solid #ccc; display: flex; align-items: center; }
+        #message { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 5px; margin-right: 10px; }
+        #send-btn { padding: 8px 15px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        #send-btn:hover { background: #0056b3; }
+        #left h3 { margin-bottom: 10px; }
+        #userList li { list-style: none; padding: 5px 0; }
+        #username { width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
+        #join-btn { width: 100%; padding: 8px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        #join-btn:hover { background: #218838; }
+        @media (max-width: 600px) { #left { width: 150px; } #chat p { max-width: 90%; } }
+    </style>
+</head>
+<body>
+    <div id="left">
+        <h3>在线用户</h3>
+        <ul id="userList"></ul>
+        <input type="text" id="username" placeholder="输入用户名">
+        <button id="join-btn" onclick="joinChat()">加入</button>
+    </div>
+    <div id="right">
+        <div id="chat"></div>
+        <div id="input-area">
+            <input type="text" id="message" placeholder="输入消息">
+            <button id="send-btn" onclick="sendMessage()">发送</button>
+        </div>
+    </div>
+    <script>
+        const roomId = location.pathname.split('/')[1] || 'default';
+        console.log('房间 ID:', roomId);
+
+        let ws;
+        let username;
+
+        function connectWebSocket(protocol) {
+            const host = location.hostname;
+            const port = location.port || (location.protocol === 'https:' ? '443' : '80');
+            const wsUrl = `${protocol}://${host}:${port}/${roomId}`;
+            console.log('尝试 WebSocket URL:', wsUrl);
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                console.log('WebSocket 已连接');
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket 错误:', error);
+                if (protocol === 'wss') {
+                    console.log('WSS 失败，尝试 WS');
+                    connectWebSocket('ws');
+                } else {
+                    alert('无法连接到聊天服务器，请检查网络或稍后重试');
+                }
+            };
+
+            ws.onclose = () => {
+                console.log('WebSocket 已关闭');
+                document.getElementById('chat').innerHTML = '';
+            };
+
+            ws.onmessage = (event) => {
+                console.log('从服务器收到:', event.data);
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data.type === 'userList') {
+                        console.log('更新用户列表:', data.users);
+                        const userList = document.getElementById('userList');
+                        userList.innerHTML = '';
+                        data.users.forEach(user => {
+                            const li = document.createElement('li');
+                            li.textContent = user;
+                            userList.appendChild(li);
+                        });
+                    } else if (data.type === 'message') {
+                        console.log('新消息:', data);
+                        const chat = document.getElementById('chat');
+                        const p = document.createElement('p');
+                        p.textContent = `${data.username}: ${data.message}`;
+                        chat.appendChild(p);
+                        chat.scrollTop = chat.scrollHeight;
+                    } else if (data.type === 'clearChat') {
+                        console.log('清空聊天记录');
+                        document.getElementById('chat').innerHTML = '';
+                    } else if (data.type === 'clearChatBeforeDisconnect') {
+                        console.log('收到断开前清除聊天指令');
+                        document.getElementById('chat').innerHTML = '';
+                    } else if (data.type === 'error') {
+                        console.log('错误:', data.message);
+                        alert(data.message);
+                    }
+                } catch (error) {
+                    console.error('消息解析错误:', error);
+                }
+            };
+        }
+
+        connectWebSocket(location.protocol === 'https:' ? 'wss' : 'ws');
+
+        function joinChat() {
+            username = document.getElementById('username').value.trim();
+            console.log('点击加入, 用户名:', username);
+            if (username && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'join', username }));
+                console.log('发送加入:', { type: 'join', username });
+            } else {
+                console.log('未输入用户名或 WebSocket 未连接');
+                alert('请输入用户名或等待服务器连接');
+            }
+        }
+
+        function sendMessage() {
+            const message = document.getElementById('message').value.trim();
+            console.log('点击发送, 消息:', message);
+            if (message && username && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'message', message }));
+                console.log('发送消息:', { type: 'message', message });
+                document.getElementById('message').value = '';
+            } else {
+                console.log('无消息、未加入或 WebSocket 未连接');
+                alert('请先加入聊天室、输入消息或等待服务器连接');
+            }
+        }
+
+        document.getElementById('message').addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
