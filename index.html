@@ -2,26 +2,197 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>聊天室</title>
-    <!-- 移除 favicon，避免 Mixed Content -->
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; display: flex; height: 100vh; overflow: hidden; }
-        #left { width: 200px; background: #f5f5f5; padding: 15px; border-right: 1px solid #ccc; overflow-y: auto; }
-        #right { flex: 1; display: flex; flex-direction: column; }
-        #chat { flex: 1; padding: 15px; overflow-y: auto; background: #fff; }
-        #chat p { margin-bottom: 10px; padding: 8px; background: #e9ecef; border-radius: 5px; max-width: 70%; }
-        #input-area { padding: 10px; background: #f5f5f5; border-top: 1px solid #ccc; display: flex; align-items: center; }
-        #message { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 5px; margin-right: 10px; }
-        #send-btn { padding: 8px 15px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        #send-btn:hover { background: #0056b3; }
-        #left h3 { margin-bottom: 10px; }
-        #userList li { list-style: none; padding: 5px 0; }
-        #username { width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
-        #join-btn { width: 100%; padding: 8px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        #join-btn:hover { background: #218838; }
-        @media (max-width: 600px) { #left { width: 150px; } #chat p { max-width: 90%; } }
+        body { 
+            font-family: Arial, sans-serif; 
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden; 
+            flex-direction: row; 
+        }
+        #left { 
+            width: 200px; 
+            background: #f5f5f5; 
+            padding: 15px; 
+            border-right: 1px solid #ccc; 
+            overflow-y: auto; 
+            transition: transform 0.3s ease; 
+        }
+        #right { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+        }
+        #chat { 
+            flex: 1; 
+            padding: 15px; 
+            overflow-y: auto; 
+            background: #fff; 
+        }
+        #chat p { 
+            margin-bottom: 10px; 
+            padding: 8px; 
+            background: #e9ecef; 
+            border-radius: 5px; 
+            max-width: 70%; 
+            word-wrap: break-word; 
+        }
+        #input-area { 
+            padding: 10px; 
+            background: #f5f5f5; 
+            border-top: 1px solid #ccc; 
+            display: flex; 
+            align-items: center; 
+        }
+        #message { 
+            flex: 1; 
+            padding: 8px; 
+            border: 1px solid #ccc; 
+            border-radius: 5px; 
+            margin-right: 10px; 
+            font-size: 16px; 
+        }
+        #send-btn { 
+            padding: 8px 15px; 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 16px; 
+        }
+        #send-btn:hover { 
+            background: #0056b3; 
+        }
+        #left h3 { 
+            margin-bottom: 10px; 
+            font-size: 18px; 
+        }
+        #userList li { 
+            list-style: none; 
+            padding: 5px 0; 
+            font-size: 16px; 
+        }
+        #username { 
+            width: 100%; 
+            padding: 8px; 
+            margin: 10px 0; 
+            border: 1px solid #ccc; 
+            border-radius: 5px; 
+            font-size: 16px; 
+        }
+        #join-btn { 
+            width: 100%; 
+            padding: 8px; 
+            background: #28a745; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 16px; 
+        }
+        #join-btn:hover { 
+            background: #218838; 
+        }
+        #toggle-users { 
+            display: none; 
+            padding: 8px; 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin-bottom: 10px; 
+            font-size: 16px; 
+        }
+        #toggle-users:hover { 
+            background: #0056b3; 
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            body { 
+                flex-direction: column; 
+            }
+            #left { 
+                width: 100%; 
+                height: 100%; 
+                position: fixed; 
+                top: 0; 
+                left: 0; 
+                transform: translateX(-100%); 
+                z-index: 1000; 
+                background: #f5f5f5; 
+            }
+            #left.active { 
+                transform: translateX(0); 
+            }
+            #right { 
+                width: 100%; 
+                height: 100%; 
+            }
+            #chat { 
+                padding: 10px; 
+            }
+            #chat p { 
+                max-width: 85%; 
+                font-size: 14px; 
+            }
+            #input-area { 
+                padding: 8px; 
+            }
+            #message { 
+                font-size: 14px; 
+                padding: 6px; 
+            }
+            #send-btn { 
+                padding: 6px 12px; 
+                font-size: 14px; 
+            }
+            #username { 
+                font-size: 14px; 
+                padding: 6px; 
+            }
+            #join-btn { 
+                padding: 6px; 
+                font-size: 14px; 
+            }
+            #toggle-users { 
+                display: block; 
+            }
+            #left h3 { 
+                font-size: 16px; 
+            }
+            #userList li { 
+                font-size: 14px; 
+            }
+        }
+
+        @media (max-width: 480px) {
+            #chat p { 
+                font-size: 12px; 
+            }
+            #message { 
+                font-size: 12px; 
+            }
+            #send-btn { 
+                font-size: 12px; 
+                padding: 5px 10px; 
+            }
+            #username { 
+                font-size: 12px; 
+            }
+            #join-btn { 
+                font-size: 12px; 
+            }
+            #toggle-users { 
+                font-size: 12px; 
+                padding: 5px; 
+            }
+        }
     </style>
 </head>
 <body>
@@ -32,6 +203,7 @@
         <button id="join-btn" onclick="joinChat()">加入</button>
     </div>
     <div id="right">
+        <button id="toggle-users" onclick="toggleUserList()">显示用户</button>
         <div id="chat"></div>
         <div id="input-area">
             <input type="text" id="message" placeholder="输入消息">
@@ -140,6 +312,13 @@
                 sendMessage();
             }
         });
+
+        function toggleUserList() {
+            const leftPanel = document.getElementById('left');
+            leftPanel.classList.toggle('active');
+            const toggleButton = document.getElementById('toggle-users');
+            toggleButton.textContent = leftPanel.classList.contains('active') ? '隐藏用户' : '显示用户';
+        }
     </script>
 </body>
 </html>
