@@ -6,12 +6,12 @@ markdown
 
 ## 项目结构
 
-project/
-├── public/
-│   └── index.html
-├── server.js
-├── package.json
-└── node_modules/ (安装依赖后生成)
+project/   
+├── public/   
+│   └── index.html   
+├── server.js   
+├── package.json   
+└── node_modules/ (安装依赖后生成)   
 
 - `index.html`: 客户端代码，提供聊天室界面和 WebSocket 交互。
 - `server.js`: 服务器代码，处理 WebSocket 连接、消息广播和用户管理。
