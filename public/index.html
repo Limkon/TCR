@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>高级版聊天室（带深色模式）</title>
+<title>Mo聊天室</title>
 <style>
 :root {
     --bg-color: #f0f2f5;
@@ -40,6 +40,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { height: 100%; width: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: var(--bg-color); }
 body { display: flex; }
+
 #left { 
     width: 250px; 
     background: var(--left-bg); 
@@ -49,25 +50,38 @@ body { display: flex; }
     position: relative;
     transition: transform 0.3s ease;
 }
-#left.hidden { 
-    transform: translateX(-100%); 
+#left.hidden {
+    transform: translateX(-250px);
 }
+
 #toggle-users { 
-    position: absolute; 
-    top: 20px; 
-    left: 100%; 
-    transform: rotate(-90deg) translateX(-50%); 
-    transform-origin: left top; 
-    background: var(--button-bg); 
-    color: white; 
-    border: none; 
-    border-radius: 8px; 
-    padding: 8px 12px; 
-    cursor: pointer; 
-    font-size: 14px; 
-    z-index: 1000;
+    position: fixed;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    background: var(--button-bg);
+    color: white;
+    border: none;
+    border-radius: 8px 0 0 8px;
+    padding: 10px 5px;
+    font-size: 16px;
+    cursor: pointer;
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    z-index: 1001;
 }
-#toggle-users:hover { background: var(--button-hover-bg); }
+#toggle-users.inside {
+    position: absolute;
+    top: 20px;
+    left: -40px;
+    height: 150px;
+    border-radius: 8px 0 0 8px;
+    background: var(--button-bg);
+}
+#toggle-users:hover {
+    background: var(--button-hover-bg);
+}
+
 #dark-mode-toggle {
     position: absolute;
     bottom: 20px;
@@ -93,16 +107,18 @@ body { display: flex; }
     font-size: 16px;
     position: relative;
     word-break: break-word;
-}
-.message-left {
     background: var(--message-left-bg);
-    align-self: flex-start;
-    color: #000;
 }
-.message-right {
-    background: var(--message-right-bg);
+.message-left { align-self: flex-start; }
+.message-right { 
+    align-self: flex-end; 
+    background: var(--message-right-bg); 
     color: var(--message-right-color);
-    align-self: flex-end;
+}
+.message-username {
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 14px;
 }
 .timestamp {
     font-size: 12px;
@@ -120,47 +136,38 @@ body { display: flex; }
 #join-btn { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; }
 #join-btn:hover { background: #218838; }
 
-/* 移动端适配 */
 @media (max-width: 768px) {
     body { flex-direction: column; }
-    #left { 
-        width: 100%; 
-        height: 100vh; 
-        position: fixed; 
-        top: 0; 
-        left: 0; 
-        transform: translateX(-100%); 
-        z-index: 1000; 
-        background: var(--left-bg); 
-        box-shadow: 2px 0 5px rgba(0,0,0,0.2); 
-    }
+    #left { width: 100%; height: 100vh; position: fixed; top: 0; left: 0; transform: translateX(-100%); }
     #left.hidden { transform: translateX(-100%); }
     #toggle-users {
         top: 20px;
         left: 10px;
         transform: none;
-        position: fixed;
+        writing-mode: horizontal-tb;
     }
-    #right { height: calc(100vh - 70px); }
+    #toggle-users.inside {
+        top: 20px;
+        left: 10px;
+    }
     #chat { padding: 10px; }
     #input-area { height: 70px; background: var(--input-bg); padding: 8px; }
     #message { font-size: 14px; padding: 10px; border-radius: 20px; }
     #send-btn { padding: 10px 15px; font-size: 14px; border-radius: 20px; }
-    #username { font-size: 16px; padding: 12px; }
-    #join-btn { font-size: 16px; padding: 12px; }
 }
 </style>
 </head>
 
 <body>
 <div id="left">
-    <button id="toggle-users" onclick="toggleUserList()">隐藏用户</button>
     <h3>在线用户</h3>
     <ul id="userList"></ul>
     <input type="text" id="username" placeholder="输入用户名">
     <button id="join-btn" onclick="joinChat()">加入</button>
     <button id="dark-mode-toggle" onclick="toggleDarkMode()">切换模式</button>
 </div>
+
+<button id="toggle-users" onclick="toggleUserList()">隐藏用户</button>
 
 <div id="right">
     <div id="chat"></div>
@@ -209,10 +216,6 @@ function connectWebSocket(protocol) {
                 });
             } else if (data.type === 'message') {
                 addMessage(data.username, data.message);
-            } else if (data.type === 'clearChat') {
-                document.getElementById('chat').innerHTML = '';
-            } else if (data.type === 'error') {
-                alert(data.message);
             }
         } catch (error) {
             console.error('消息解析错误:', error);
@@ -226,7 +229,13 @@ function toggleUserList() {
     const leftPanel = document.getElementById('left');
     const toggleButton = document.getElementById('toggle-users');
     leftPanel.classList.toggle('hidden');
-    toggleButton.textContent = leftPanel.classList.contains('hidden') ? '显示用户' : '隐藏用户';
+    if (leftPanel.classList.contains('hidden')) {
+        toggleButton.textContent = '显示用户';
+        toggleButton.classList.remove('inside');
+    } else {
+        toggleButton.textContent = '隐藏用户';
+        toggleButton.classList.add('inside');
+    }
 }
 
 function joinChat() {
@@ -258,7 +267,11 @@ function addMessage(sender, text, isSelf = false) {
     const chat = document.getElementById('chat');
     const messageDiv = document.createElement('div');
     messageDiv.className = isSelf || sender === username ? 'message-right' : 'message-left';
-    messageDiv.innerHTML = `<div>${text}</div><div class="timestamp">${getCurrentTime()}</div>`;
+    messageDiv.innerHTML = `
+        <div class="message-username">${sender}</div>
+        <div>${text}</div>
+        <div class="timestamp">${getCurrentTime()}</div>
+    `;
     chat.appendChild(messageDiv);
     chat.scrollTop = chat.scrollHeight;
 }
