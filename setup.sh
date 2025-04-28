@@ -6,16 +6,20 @@ echo "🚀 正在开始安装 TCR 聊天室项目..."
 # 获取当前目录
 PROJECT_DIR=$(pwd)
 
-# 将当前目录添加到 Git 的 safe.directory
+# 强制设置 Git safe.directory 以避免所有权问题
 echo "🔒 配置 Git safe.directory 以避免所有权问题..."
-git config --global --add safe.directory "$PROJECT_DIR"
+git config --global --add safe.directory "$PROJECT_DIR" || {
+    echo "⚠️ 无法设置 Git safe.directory，尝试临时禁用所有权检查..."
+    export GIT_CEILING_DIRECTORIES="$PROJECT_DIR/.."
+}
 
 # 检查当前目录是否已是 Git 仓库
 if [ -d "$PROJECT_DIR/.git" ]; then
     echo "📁 当前目录已经是 Git 仓库，尝试更新..."
     cd "$PROJECT_DIR"
     git pull origin master || git pull origin main || {
-        echo "❌ 无法更新仓库，请检查 Git 配置或手动处理。"
+        echo "❌ 无法更新仓库，请检查 Git 配置或手动运行以下命令："
+        echo "cd $PROJECT_DIR && git config --global --add safe.directory $PROJECT_DIR && git pull origin master"
         exit 1
     }
 else
@@ -32,11 +36,11 @@ else
         }
     else
         # 克隆 TCR 项目到临时目录，然后复制文件到当前目录
-        echo "📥 追加 TCR 项目到当前目录..."
+        echo "📥 追加 TCR 项目到当前目录（覆盖同名文件）..."
         TEMP_DIR=$(mktemp -d)
         git clone https://github.com/Limkon/TCR.git "$TEMP_DIR"
-        # 复制所有文件（包括隐藏文件）到当前目录，覆盖同名文件
-        cp -r "$TEMP_DIR"/. "$PROJECT_DIR"
+        # 复制所有文件（包括隐藏文件）到当前目录，强制覆盖同名文件
+        cp -rf "$TEMP_DIR"/. "$PROJECT_DIR"
         # 初始化 Git 仓库
         cd "$PROJECT_DIR"
         git init 2>/dev/null || true
