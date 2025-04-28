@@ -12,9 +12,7 @@
             --chat-bg: #fff;
             --input-bg: #fff;
             --input-border: #ccc;
-            --message-left-bg: #e9ecef; /* 亮色模式 */
-            --message-right-bg: #007bff;
-            --message-right-color: white;
+            --message-right-color: #007bff;
             --button-bg: #007bff;
             --button-hover-bg: #0056b3;
         }
@@ -26,9 +24,7 @@
             --chat-bg: #1e1e1e;
             --input-bg: #2c2c2c;
             --input-border: #555;
-            --message-left-bg: #ffffff; /* 暗色模式 */
-            --message-right-bg: #007bff;
-            --message-right-color: white;
+            --message-right-color: #007bff;
             --button-bg: #555;
             --button-hover-bg: #777;
         }
@@ -89,17 +85,13 @@
         #chat { flex: 1; padding: 15px; background: var(--chat-bg); overflow-y: auto; display: flex; flex-direction: column; }
         .message-left, .message-right {
             max-width: 70%;
-            padding: 10px 14px;
             margin: 6px 0;
-            border-radius: 18px;
             font-size: 16px;
             word-break: break-word;
-            background: var(--message-left-bg);
         }
         .message-left { align-self: flex-start; }
         .message-right { 
             align-self: flex-end; 
-            background: var(--message-right-bg); 
             color: var(--message-right-color);
         }
         .message-username { font-weight: bold; margin-bottom: 5px; font-size: 14px; }
@@ -190,7 +182,7 @@
 
         function sendMessage() {
             const message = document.getElementById('message').value.trim();
-            if (message && username && ws.readyState ===WebSocket.OPEN) {
+            if (message && username && ws.readyState === WebSocket.OPEN) {
                 ws.send(JSON.stringify({ type: 'message', message }));
                 addMessage(username, message, true);
                 document.getElementById('message').value = '';
