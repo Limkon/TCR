@@ -28,6 +28,7 @@
             flex: 1; 
             display: flex; 
             flex-direction: column; 
+            transition: margin-left 0.3s ease; 
         }
         #chat { 
             flex: 1; 
@@ -109,7 +110,6 @@
             background: #218838; 
         }
         #toggle-users { 
-            display: none; 
             padding: 12px; 
             background: #007bff; 
             color: white; 
@@ -138,6 +138,9 @@
         #hide-users:hover { 
             background: #c82333; 
         }
+        #left.hidden { 
+            transform: translateX(-100%); 
+        }
 
         /* 移动端适配 */
         @media (max-width: 768px) {
@@ -153,21 +156,16 @@
                 position: fixed; 
                 top: 0; 
                 left: 0; 
-                transform: translateX(0); /* 默认显示 */
+                transform: translateX(0); 
                 z-index: 1000; 
                 background: #ffffff; 
                 padding: 20px; 
                 box-shadow: 2px 0 5px rgba(0,0,0,0.2); 
             }
-            #left.active { 
-                transform: translateX(0); 
-            }
-            #left.hidden { 
-                transform: translateX(-100%); 
-            }
             #right { 
                 width: 100%; 
                 height: 100%; 
+                margin-left: 0; 
             }
             #chat { 
                 padding: 10px; 
@@ -347,7 +345,7 @@
 
         let ws;
         let username = null;
-        let hasJoined = false; // 跟踪是否已加入
+        let hasJoined = false;
 
         function connectWebSocket(protocol) {
             const host = location.hostname;
@@ -373,7 +371,7 @@
             ws.onclose = () => {
                 console.log('WebSocket 已关闭');
                 document.getElementById('chat').innerHTML = '';
-                hasJoined = false; // 重置加入状态
+                hasJoined = false;
                 username = null;
                 updateJoinButtonState();
             };
@@ -394,7 +392,7 @@
                     } else if (data.type === 'message') {
                         console.log('新消息:', data);
                         const chat = document.getElementById('chat');
-                        const p = document.createElement('p');
+                        const p Hutchinson document.createElement('p');
                         p.textContent = `${data.username}: ${data.message}`;
                         chat.appendChild(p);
                         chat.scrollTop = chat.scrollHeight;
@@ -429,7 +427,6 @@
                 console.log('发送加入:', { type: 'join', username });
                 hasJoined = true;
                 updateJoinButtonState();
-                toggleUserList(); // 加入后隐藏用户列表
             } else {
                 console.log('未输入用户名或 WebSocket 未连接');
                 alert('请输入用户名或等待服务器连接');
@@ -474,27 +471,36 @@
 
         function toggleUserList() {
             const leftPanel = document.getElementById('left');
-            const isActive = leftPanel.classList.contains('active');
-            leftPanel.classList.toggle('active', !isActive);
-            leftPanel.classList.toggle('hidden', isActive);
+            const isHidden = leftPanel.classList.contains('hidden');
+            leftPanel.classList.toggle('hidden', !isHidden);
             const toggleButton = document.getElementById('toggle-users');
-            toggleButton.textContent = isActive ? '显示用户' : '隐藏用户';
+            toggleButton.textContent = isHidden ? '隐藏用户' : '显示用户';
+
+            // 调整右侧聊天区域宽度
+            const rightPanel = document.getElementById('right');
+            if (isHidden) {
+                leftPanel.style.transform = 'translateX(0)';
+                rightPanel.style.marginLeft = window.innerWidth > 768 ? '250px' : '0';
+            } else {
+                leftPanel.style.transform = 'translateX(-100%)';
+                rightPanel.style.marginLeft = '0';
+            }
         }
 
-        // 移动端软键盘处理
         function adjustInputArea() {
             const inputArea = document.getElementById('input-area');
             const messageInput = document.getElementById('message');
+            const chatArea = document.getElementById('chat');
 
             messageInput.addEventListener('focus', () => {
                 setTimeout(() => {
                     inputArea.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                    document.getElementById('chat').style.height = `calc(100vh - ${inputArea.offsetHeight + 20}px)`;
+                    chatArea.style.height = `calc(100vh - ${inputArea.offsetHeight + 20}px)`;
                 }, 300);
             });
 
             messageInput.addEventListener('blur', () => {
-                document.getElementById('chat').style.height = `calc(100vh - ${inputArea.offsetHeight}px)`;
+                chatArea.style.height = `calc(100vh - ${inputArea.offsetHeight}px)`;
             });
 
             window.addEventListener('resize', () => {
@@ -504,7 +510,6 @@
             });
         }
 
-        // 初始化
         adjustInputArea();
         updateJoinButtonState();
     </script>
