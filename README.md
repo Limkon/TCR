@@ -6,7 +6,7 @@ markdown
 支持alwaysdata空间一键安装[https://www.alwaysdata.com/en/]   
 ```bash
 bash <(wget -qO- https://raw.githubusercontent.com/Limkon/TCR/refs/heads/master/setup.sh)
-
+   
 ## 项目结构
 
 project/   
