@@ -47,11 +47,12 @@ body { display: flex; }
     padding: 20px; 
     border-right: 1px solid var(--left-border); 
     overflow-y: auto; 
-    position: relative;
-    transition: transform 0.3s ease;
+    transition: width 0.3s ease;
 }
 #left.hidden {
-    transform: translateX(-250px);
+    width: 40px;
+    padding: 0;
+    overflow: hidden;
 }
 
 #toggle-users { 
@@ -62,21 +63,13 @@ body { display: flex; }
     background: var(--button-bg);
     color: white;
     border: none;
-    border-radius: 8px 0 0 8px;
+    border-radius: 0 8px 8px 0;
     padding: 10px 5px;
     font-size: 16px;
     cursor: pointer;
     writing-mode: vertical-rl;
     text-orientation: upright;
     z-index: 1001;
-}
-#toggle-users.inside {
-    position: absolute;
-    top: 20px;
-    left: -40px;
-    height: 150px;
-    border-radius: 8px 0 0 8px;
-    background: var(--button-bg);
 }
 #toggle-users:hover {
     background: var(--button-hover-bg);
@@ -92,7 +85,7 @@ body { display: flex; }
     border: none;
     border-radius: 8px;
     padding: 8px 12px;
-    font-size: 14px;
+    font-size headlights: 14px;
     cursor: pointer;
 }
 #dark-mode-toggle:hover { background: var(--button-hover-bg); }
@@ -139,16 +132,13 @@ body { display: flex; }
 @media (max-width: 768px) {
     body { flex-direction: column; }
     #left { width: 100%; height: 100vh; position: fixed; top: 0; left: 0; transform: translateX(-100%); }
-    #left.hidden { transform: translateX(-100%); }
+    #left.hidden { transform: translateX(-100%); width: 100%; }
     #toggle-users {
         top: 20px;
         left: 10px;
         transform: none;
         writing-mode: horizontal-tb;
-    }
-    #toggle-users.inside {
-        top: 20px;
-        left: 10px;
+        border-radius: 8px;
     }
     #chat { padding: 10px; }
     #input-area { height: 70px; background: var(--input-bg); padding: 8px; }
@@ -231,10 +221,8 @@ function toggleUserList() {
     leftPanel.classList.toggle('hidden');
     if (leftPanel.classList.contains('hidden')) {
         toggleButton.textContent = '显示用户';
-        toggleButton.classList.remove('inside');
     } else {
         toggleButton.textContent = '隐藏用户';
-        toggleButton.classList.add('inside');
     }
 }
 
@@ -284,8 +272,10 @@ function getCurrentTime() {
 function toggleDarkMode() {
     document.body.classList.toggle('dark-mode');
 }
+
+// 修复消息发送两次问题：确保 Enter 键只触发一次
 document.getElementById('message').addEventListener('keypress', (event) => {
-    if (event.key === 'Enter') {
+    if (event.key === 'Enter' && !event.repeat) {
         event.preventDefault();
         sendMessage();
     }
