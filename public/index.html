@@ -2,28 +2,270 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mo聊天室</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div id="left">
-    <h3 id="roomTitle">当前在线用户</h3>
-    <ul id="userList"></ul>
-    <input type="text" id="username" placeholder="输入用户名">
-    <button id="join-btn">加入聊天</button>
-    <button id="dark-mode-toggle">切换模式</button>
-    <button id="toggle-users">隐藏用户</button>
-  </div>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg: #f0f2f5;
+      --left-bg: #fff;
+      --border-color: #ddd;
+      --btn-bg: #007bff;
+      --btn-hover: #0056b3;
+      --input-bg: #fff;
+      --dark-bg: #1e1e1e;
+      --dark-left-bg: #2c2c2c;
+      --dark-border: #444;
+      --dark-btn-bg: #555;
+      --dark-btn-hover: #777;
+    }
 
-  <div id="right">
-    <div id="chat"></div>
-    <div id="input-area">
-      <input type="text" id="message" placeholder="输入消息">
-      <button id="send-btn">发送</button>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    }
+
+    #sidebar {
+      width: 250px;
+      background: var(--left-bg);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      padding: 15px;
+      transition: width 0.3s, padding 0.3s;
+    }
+
+    #sidebar.hidden {
+      width: 0;
+      padding: 0;
+      overflow: hidden;
+      border: none;
+    }
+
+    #sidebar h2 {
+      margin-bottom: 10px;
+      font-size: 20px;
+    }
+
+    #userList {
+      flex: 1;
+      list-style: none;
+      padding: 0;
+      overflow-y: auto;
+      margin-bottom: 15px;
+    }
+
+    #userList li {
+      margin: 5px 0;
+      font-size: 16px;
+    }
+
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .controls input, .controls button {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+
+    .controls button {
+      background: var(--btn-bg);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    .controls button:hover {
+      background: var(--btn-hover);
+    }
+
+    #chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #chat {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+    }
+
+    .message {
+      margin: 8px 0;
+    }
+
+    .message .username {
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+
+    .message .text {
+      word-break: break-word;
+    }
+
+    #input-area {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid var(--border-color);
+      background: var(--input-bg);
+    }
+
+    #messageInput {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+    }
+
+    #sendBtn {
+      padding: 10px 20px;
+      margin-left: 10px;
+      background: var(--btn-bg);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #sendBtn:hover {
+      background: var(--btn-hover);
+    }
+
+    body.dark {
+      --bg: var(--dark-bg);
+      --left-bg: var(--dark-left-bg);
+      --border-color: var(--dark-border);
+      --btn-bg: var(--dark-btn-bg);
+      --btn-hover: var(--dark-btn-hover);
+      --input-bg: var(--dark-left-bg);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="sidebar">
+    <h2>在线用户</h2>
+    <ul id="userList"></ul>
+    <div class="controls">
+      <input type="text" id="usernameInput" placeholder="输入用户名">
+      <button id="joinBtn">加入聊天室</button>
+      <button id="toggleSidebarBtn">隐藏/显示用户栏</button>
+      <button id="toggleDarkModeBtn">切换暗黑模式</button>
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <div id="chat-area">
+    <div id="chat"></div>
+    <div id="input-area">
+      <input type="text" id="messageInput" placeholder="输入消息">
+      <button id="sendBtn">发送</button>
+    </div>
+  </div>
+
+  <script>
+    const roomId = location.pathname.split('/')[1] || 'default';
+    let ws;
+    let username = '';
+    let users = [];
+
+    function connect() {
+      const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+      const wsUrl = `${protocol}://${location.hostname}:${location.port}/${roomId}`;
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => console.log('WebSocket连接成功');
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'userList') {
+          users = data.users;
+          renderUserList();
+        } else if (data.type === 'message') {
+          addMessage(data.username, data.message);
+        } else if (data.type === 'clearChat') {
+          clearChat();
+        } else if (data.type === 'error') {
+          alert(data.message);
+          username = '';
+        }
+      };
+      ws.onclose = () => console.log('WebSocket连接关闭');
+    }
+
+    connect();
+
+    function renderUserList() {
+      const userList = document.getElementById('userList');
+      userList.innerHTML = '';
+      users.forEach(u => {
+        const li = document.createElement('li');
+        li.textContent = u;
+        userList.appendChild(li);
+      });
+    }
+
+    function addMessage(user, message) {
+      const chat = document.getElementById('chat');
+      const div = document.createElement('div');
+      div.className = 'message';
+      div.innerHTML = `<div class="username">${user}</div><div class="text">${message}</div>`;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function clearChat() {
+      document.getElementById('chat').innerHTML = '';
+    }
+
+    document.getElementById('joinBtn').addEventListener('click', () => {
+      const input = document.getElementById('usernameInput');
+      const value = input.value.trim();
+      if (!value) {
+        alert('请输入用户名');
+        return;
+      }
+      if (users.includes(value)) {
+        alert('用户名已存在');
+        return;
+      }
+      username = value;
+      ws.send(JSON.stringify({ type: 'join', username }));
+    });
+
+    document.getElementById('sendBtn').addEventListener('click', sendMessage);
+    document.getElementById('messageInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+
+    function sendMessage() {
+      const input = document.getElementById('messageInput');
+      const text = input.value.trim();
+      if (text && username) {
+        ws.send(JSON.stringify({ type: 'message', message: text }));
+        input.value = '';
+      }
+    }
+
+    document.getElementById('toggleSidebarBtn').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('hidden');
+    });
+
+    document.getElementById('toggleDarkModeBtn').addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+    });
+
+  </script>
+
 </body>
 </html>
