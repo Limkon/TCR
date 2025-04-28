@@ -6,6 +6,10 @@ echo "🚀 正在开始安装 TCR 聊天室项目..."
 # 获取当前目录
 PROJECT_DIR=$(pwd)
 
+# 将当前目录添加到 Git 的 safe.directory
+echo "🔒 配置 Git safe.directory 以避免所有权问题..."
+git config --global --add safe.directory "$PROJECT_DIR"
+
 # 检查当前目录是否已是 Git 仓库
 if [ -d "$PROJECT_DIR/.git" ]; then
     echo "📁 当前目录已经是 Git 仓库，尝试更新..."
