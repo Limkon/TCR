@@ -6,19 +6,28 @@ echo "🚀 正在开始安装 TCR 聊天室项目..."
 # 获取当前目录
 PROJECT_DIR=$(pwd)
 
-# 克隆仓库到当前目录
-if [ ! -d "$PROJECT_DIR/.git" ]; then
+# 检查当前目录是否已是 Git 仓库
+if [ -d "$PROJECT_DIR/.git" ]; then
+    echo "📁 当前目录已经是 Git 仓库，尝试更新..."
+    cd "$PROJECT_DIR"
+    git pull origin master || {
+        echo "❌ 无法更新仓库，请检查 Git 配置或手动处理。"
+        exit 1
+    }
+else
+    # 目录不为空或为空，自动清空
+    echo "🗑️ 清空当前目录 ($PROJECT_DIR)..."
+    rm -rf "$PROJECT_DIR"/*
+    rm -rf "$PROJECT_DIR"/.[!.]*
+    # 克隆仓库到当前目录
     echo "📥 克隆项目到当前目录..."
     git clone https://github.com/Limkon/TCR.git "$PROJECT_DIR"
-    # 删除 .git 以外的临时克隆内容并移动 TCR 内容到当前目录
     TEMP_DIR=$(mktemp -d)
     mv "$PROJECT_DIR/.git" "$TEMP_DIR/.git"
     rm -rf "$PROJECT_DIR"/*
     mv "$TEMP_DIR/.git" "$PROJECT_DIR/.git"
     git checkout .
     rmdir "$TEMP_DIR"
-else
-    echo "📁 项目目录已经存在，跳过克隆步骤。"
 fi
 
 # 检查 node 是否安装
