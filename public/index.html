@@ -84,7 +84,6 @@
         #right { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         #chat { flex: 1; padding: 15px; background: var(--chat-bg); overflow-y: auto; display: flex; flex-direction: column; }
 
-        /* —— 纯文本消息 —— */
         .message-left, .message-right {
             margin: 6px 0;
             font-size: 16px;
@@ -143,6 +142,7 @@
         let ws;
         let username;
         let joined = false;
+        let currentUsers = [];
 
         function connectWebSocket(protocol) {
             const host = location.hostname;
@@ -151,23 +151,30 @@
             ws = new WebSocket(wsUrl);
 
             ws.onopen = () => console.log('WebSocket 已连接');
+
             ws.onmessage = (event) => {
                 try {
                     const data = JSON.parse(event.data);
                     if (data.type === 'userList') {
-                        const userList = document.getElementById('userList');
-                        userList.innerHTML = '';
-                        data.users.forEach(user => {
-                            const li = document.createElement('li');
-                            li.textContent = user;
-                            userList.appendChild(li);
-                        });
+                        updateUserList(data.users);
                     } else if (data.type === 'message') {
                         addMessage(data.username, data.message);
+                    } else if (data.type === 'joinError') {
+                        alert('用户名已存在，请重新输入');
+                        joined = false;
                     }
                 } catch (error) {
                     console.error('消息解析错误:', error);
                 }
+            };
+
+            ws.onclose = () => {
+                console.log('WebSocket 连接断开');
+                clearChatAndUsers();
+            };
+
+            ws.onerror = (err) => {
+                console.error('WebSocket 错误:', err);
             };
         }
 
@@ -186,11 +193,19 @@
                 return;
             }
             username = document.getElementById('username').value.trim();
-            if (username && ws.readyState === WebSocket.OPEN) {
+            if (!username) {
+                alert('请输入用户名');
+                return;
+            }
+            if (currentUsers.includes(username)) {
+                alert('用户名已存在，请换一个');
+                return;
+            }
+            if (ws.readyState === WebSocket.OPEN) {
                 ws.send(JSON.stringify({ type: 'join', username }));
                 joined = true;
             } else {
-                alert('请输入用户名或等待服务器连接');
+                alert('服务器未连接，请稍后重试');
             }
         }
 
@@ -216,6 +231,23 @@
             `;
             chat.appendChild(messageDiv);
             chat.scrollTop = chat.scrollHeight;
+        }
+
+        function updateUserList(users) {
+            currentUsers = users;
+            const userList = document.getElementById('userList');
+            userList.innerHTML = '';
+            users.forEach(user => {
+                const li = document.createElement('li');
+                li.textContent = user;
+                userList.appendChild(li);
+            });
+        }
+
+        function clearChatAndUsers() {
+            document.getElementById('chat').innerHTML = '';
+            document.getElementById('userList').innerHTML = '';
+            joined = false;
         }
 
         function getCurrentTime() {
