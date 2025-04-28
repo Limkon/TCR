@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>聊天室</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { 
+            height: 100%; 
+            width: 100%; 
+            overflow: hidden; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
+        }
+        body { 
+            display: flex; 
+            flex-direction: row; 
+        }
+        #left { 
+            width: 250px; 
+            background: #f5f5f5; 
+            padding: 20px; 
+            border-right: 1px solid #ccc; 
+            overflow-y: auto; 
+            transition: transform 0.3s ease; 
+        }
+        #right { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+        }
+        #chat { 
+            flex: 1; 
+            padding: 15px; 
+            overflow-y: auto; 
+            background: #fff; 
+        }
+        #chat p { 
+            margin-bottom: 10px; 
+            padding: 10px; 
+            background: #e9ecef; 
+            border-radius: 8px; 
+            max-width: 75%; 
+            word-wrap: break-word; 
+            font-size: 16px; 
+            line-height: 1.4; 
+        }
+        #input-area { 
+            padding: 10px; 
+            background: #f5f5f5; 
+            border-top: 1px solid #ccc; 
+            display: flex; 
+            align-items: center; 
+        }
+        #message { 
+            flex: 1; 
+            padding: 12px; 
+            border: 1px solid #ccc; 
+            border-radius: 8px; 
+            margin-right: 10px; 
+            font-size: 16px; 
+        }
+        #send-btn { 
+            padding: 12px 20px; 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 16px; 
+        }
+        #send-btn:hover { 
+            background: #0056b3; 
+        }
+        #left h3 { 
+            margin-bottom: 20px; 
+            font-size: 20px; 
+            white-space: nowrap; 
+        }
+        #userList li { 
+            list-style: none; 
+            padding: 10px 0; 
+            font-size: 18px; 
+        }
+        #username { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 20px 0; 
+            border: 1px solid #ccc; 
+            border-radius: 8px; 
+            font-size: 18px; 
+            min-width: 220px; 
+        }
+        #join-btn { 
+            width: 100%; 
+            padding: 12px; 
+            background: #28a745; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 18px; 
+            min-width: 220px; 
+        }
+        #join-btn:hover { 
+            background: #218838; 
+        }
+        #toggle-users { 
+            display: none; 
+            padding: 12px; 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            margin: 10px; 
+            font-size: 16px; 
+            align-self: flex-start; 
+        }
+        #toggle-users:hover { 
+            background: #0056b3; 
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            body { 
+                flex-direction: column; 
+                height: 100vh; 
+            }
+            #left { 
+                width: 75%; 
+                min-width: 320px; 
+                max-width: 400px; 
+                height: 100vh; 
+                position: fixed; 
+                top: 0; 
+                left: 0; 
+                transform: translateX(-100%); 
+                z-index: 1000; 
+                background: #ffffff; 
+                padding: 20px; 
+                box-shadow: 2px 0 5px rgba(0,0,0,0.2); 
+            }
+            #left.active { 
+                transform: translateX(0); 
+            }
+            #right { 
+                width: 100%; 
+                height: 100%; 
+            }
+            #chat { 
+                padding: 10px; 
+                height: calc(100vh - 70px); 
+            }
+            #chat p { 
+                max-width: 85%; 
+                font-size: 14px; 
+                padding: 8px; 
+            }
+            #input-area { 
+                padding: 10px; 
+                height: 70px; 
+                background: #ffffff; 
+            }
+            #message { 
+                font-size: 14px; 
+                padding: 10px; 
+                border-radius: 20px; 
+            }
+            #send-btn { 
+                padding: 10px 15px; 
+                font-size: 14px; 
+                border-radius: 20px; 
+            }
+            #username { 
+                font-size: 16px; 
+                padding: 12px; 
+                margin: 25px 0; 
+                min-width: 280px; 
+                border-radius: 20px; 
+            }
+            #join-btn { 
+                padding: 12px; 
+                font-size: 16px; 
+                min-width: 280px; 
+                border-radius: 20px; 
+            }
+            #toggle-users { 
+                display: block; 
+                margin: 10px; 
+                border-radius: 20px; 
+            }
+            #left h3 { 
+                font-size: 18px; 
+                margin-bottom: 25px; 
+            }
+            #userList li { 
+                font-size: 16px; 
+                padding: 10px 0; 
+            }
+        }
+
+        @media (max-width: 480px) {
+            #chat p { 
+                font-size: 13px; 
+            }
+            #message { 
+                font-size: 13px; 
+                padding: 8px; 
+            }
+            #send-btn { 
+                padding: 8px 12px; 
+                font-size: 13px; 
+            }
+            #username { 
+                font-size: 14px; 
+                padding: 10px; 
+                margin: 20px 0; 
+                min-width: 260px; 
+            }
+            #join-btn { 
+                padding: 10px; 
+                font-size: 14px; 
+                min-width: 260px; 
+            }
+            #toggle-users { 
+                font-size: 13px; 
+                padding: 8px 12px; 
+                margin: 8px; 
+            }
+            #left h3 { 
+                font-size: 16px; 
+            }
+            #userList li { 
+                font-size: 14px; 
+                padding: 8px 0; 
+            }
+            #chat { 
+                padding: 8px; 
+            }
+            #input-area { 
+                padding: 8px; 
+            }
+            #left { 
+                min-width: 300px; 
+            }
+        }
+
+        @media (max-width: 360px) {
+            #chat p { 
+                font-size: 12px; 
+            }
+            #message { 
+                font-size: 12px; 
+                padding: 6px; 
+            }
+            #send-btn { 
+                padding: 6px 10px; 
+                font-size: 12px; 
+            }
+            #username { 
+                font-size: 13px; 
+                padding: 8px; 
+                margin: 15px 0; 
+                min-width: 240px; 
+            }
+            #join-btn { 
+                padding: 8px; 
+                font-size: 13px; 
+                min-width: 240px; 
+            }
+            #toggle-users { 
+                font-size: 12px; 
+                padding: 6px 10px; 
+                margin: 6px; 
+            }
+            #left h3 { 
+                font-size: 15px; 
+            }
+            #userList li { 
+                font-size: 13px; 
+                padding: 6px 0; 
+            }
+            #left { 
+                min-width: 280px; 
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="left">
+        <h3>在线用户</h3>
+        <ul id="userList"></ul>
+        <input type="text" id="username" placeholder="输入用户名">
+        <button id="join-btn" onclick="joinChat()">加入</button>
+    </div>
+    <div id="right">
+        <button id="toggle-users" onclick="toggleUserList()">显示用户</button>
+        <div id="chat"></div>
+        <div id="input-area">
+            <input type="text" id="message" placeholder="输入消息">
+            <button id="send-btn" onclick="sendMessage()">发送</button>
+        </div>
+    </div>
+    <script>
+        const roomId = location.pathname.split('/')[1] || 'default';
+        console.log('房间 ID:', roomId);
+
+        let ws;
+        let username;
+
+        function connectWebSocket(protocol) {
+            const host = location.hostname;
+            const port = location.port || (location.protocol === 'https:' ? '443' : '80');
+            const wsUrl = `${protocol}://${host}:${port}/${roomId}`;
+            console.log('尝试 WebSocket URL:', wsUrl);
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                console.log('WebSocket 已连接');
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket 错误:', error);
+                if (protocol === 'wss') {
+                    console.log('WSS 失败，尝试 WS');
+                    connectWebSocket('ws');
+                } else {
+                    alert('无法连接到聊天服务器，请检查网络或稍后重试');
+                }
+            };
+
+            ws.onclose = () => {
+                console.log('WebSocket 已关闭');
+                document.getElementById('chat').innerHTML = '';
+            };
+
+            ws.onmessage = (event) => {
+                console.log('从服务器收到:', event.data);
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data.type === 'userList') {
+                        console.log('更新用户列表:', data.users);
+                        const userList = document.getElementById('userList');
+                        userList.innerHTML = '';
+                        data.users.forEach(user => {
+                            const li = document.createElement('li');
+                            li.textContent = user;
+                            userList.appendChild(li);
+                        });
+                    } else if (data.type === 'message') {
+                        console.log('新消息:', data);
+                        const chat = document.getElementById('chat');
+                        const p = document.createElement('p');
+                        p.textContent = `${data.username}: ${data.message}`;
+                        chat.appendChild(p);
+                        chat.scrollTop = chat.scrollHeight;
+                    } else if (data.type === 'clearChat') {
+                        console.log('清空聊天记录');
+                        document.getElementById('chat').innerHTML = '';
+                    } else if (data.type === 'clearChatBeforeDisconnect') {
+                        console.log('收到断开前清除聊天指令');
+                        document.getElementById('chat').innerHTML = '';
+                    } else if (data.type === 'error') {
+                        console.log('错误:', data.message);
+                        alert(data.message);
+                    }
+                } catch (error) {
+                    console.error('消息解析错误:', error);
+                }
+            };
+        }
+
+        connectWebSocket(location.protocol === 'https:' ? 'wss' : 'ws');
+
+        function joinChat() {
+            username = document.getElementById('username').value.trim();
+            console.log('点击加入, 用户名:', username);
+            if (username && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'join', username }));
+                console.log('发送加入:', { type: 'join', username });
+            } else {
+                console.log('未输入用户名或 WebSocket 未连接');
+                alert('请输入用户名或等待服务器连接');
+            }
+        }
+
+        function sendMessage() {
+            const message = document.getElementById('message').value.trim();
+            console.log('点击发送, 消息:', message);
+            if (message && username && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'message', message }));
+                console.log('发送消息:', { type: 'message', message });
+                document.getElementById('message').value = '';
+            } else {
+                console.log('无消息、未加入或 WebSocket 未连接');
+                alert('请先加入聊天室、输入消息或等待服务器连接');
+            }
+        }
+
+        document.getElementById('message').addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+
+        function toggleUserList() {
+            const leftPanel = document.getElementById('left');
+            leftPanel.classList.toggle('active');
+            const toggleButton = document.getElementById('toggle-users');
+            toggleButton.textContent = leftPanel.classList.contains('active') ? '隐藏用户' : '显示用户';
+        }
+    </script>
+</body>
+</html>
