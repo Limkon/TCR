@@ -36,7 +36,8 @@ handle_git_status() {
         echo "1) 备份未跟踪文件"
         echo "2) 删除未跟踪文件"
         echo "3) 退出以手动处理"
-        read -p "请输入选项 (1/2/3): " choice
+        echo "4) 强制覆盖（警告：将丢失所有未提交的更改！）"
+        read -p "请输入选项 (1/2/3/4): " choice
         case $choice in
             1)
                 echo "📂 备份未跟踪文件到 backup_$(date +%F_%H-%M-%S)..."
@@ -55,6 +56,18 @@ handle_git_status() {
                 echo "🚪 退出脚本，请手动处理未跟踪文件后重新运行。"
                 echo "建议运行：git status"
                 exit 1
+                ;;
+            4)
+                echo "⚠️ 警告：强制覆盖将删除所有未跟踪文件和本地修改！"
+                read -p "确认继续？(y/N): " confirm
+                if [ "$confirm" = "y" ] || [ "$confirm" = "Y" ]; then
+                    echo "🔄 强制覆盖本地更改..."
+                    git reset --hard
+                    git clean -fd
+                else
+                    echo "🚪 已取消强制覆盖，退出。"
+                    exit 1
+                fi
                 ;;
             *)
                 echo "❌ 无效选项，退出。"
