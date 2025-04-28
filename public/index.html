@@ -51,6 +51,9 @@
             border-top: 1px solid #ccc; 
             display: flex; 
             align-items: center; 
+            position: sticky; 
+            bottom: 0; 
+            z-index: 100; 
         }
         #message { 
             flex: 1; 
@@ -120,6 +123,21 @@
         #toggle-users:hover { 
             background: #0056b3; 
         }
+        #hide-users { 
+            width: 100%; 
+            padding: 12px; 
+            background: #dc3545; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            margin-top: 10px; 
+            font-size: 18px; 
+            min-width: 220px; 
+        }
+        #hide-users:hover { 
+            background: #c82333; 
+        }
 
         /* 移动端适配 */
         @media (max-width: 768px) {
@@ -151,6 +169,7 @@
             #chat { 
                 padding: 10px; 
                 height: calc(100vh - 70px); 
+                overflow-y: auto; 
             }
             #chat p { 
                 max-width: 85%; 
@@ -182,6 +201,12 @@
             #join-btn { 
                 padding: 12px; 
                 font-size: 16px; 
+                min-width: 280px; 
+                border-radius: 20px; 
+            }
+            #hide-users { 
+                font-size: 16px; 
+                padding: 12px; 
                 min-width: 280px; 
                 border-radius: 20px; 
             }
@@ -221,6 +246,11 @@
             #join-btn { 
                 padding: 10px; 
                 font-size: 14px; 
+                min-width: 260px; 
+            }
+            #hide-users { 
+                font-size: 14px; 
+                padding: 10px; 
                 min-width: 260px; 
             }
             #toggle-users { 
@@ -269,6 +299,11 @@
                 font-size: 13px; 
                 min-width: 240px; 
             }
+            #hide-users { 
+                font-size: 13px; 
+                padding: 8px; 
+                min-width: 240px; 
+            }
             #toggle-users { 
                 font-size: 12px; 
                 padding: 6px 10px; 
@@ -293,6 +328,7 @@
         <ul id="userList"></ul>
         <input type="text" id="username" placeholder="输入用户名">
         <button id="join-btn" onclick="joinChat()">加入</button>
+        <button id="hide-users" onclick="toggleUserList()">隐藏用户</button>
     </div>
     <div id="right">
         <button id="toggle-users" onclick="toggleUserList()">显示用户</button>
@@ -379,6 +415,7 @@
             if (username && ws.readyState === WebSocket.OPEN) {
                 ws.send(JSON.stringify({ type: 'join', username }));
                 console.log('发送加入:', { type: 'join', username });
+                toggleUserList(); // 加入后自动隐藏用户列表
             } else {
                 console.log('未输入用户名或 WebSocket 未连接');
                 alert('请输入用户名或等待服务器连接');
@@ -411,6 +448,37 @@
             const toggleButton = document.getElementById('toggle-users');
             toggleButton.textContent = leftPanel.classList.contains('active') ? '隐藏用户' : '显示用户';
         }
+
+        // 移动端软键盘处理
+        function adjustInputArea() {
+            const inputArea = document.getElementById('input-area');
+            const messageInput = document.getElementById('message');
+
+            // 监听输入框聚焦
+            messageInput.addEventListener('focus', () => {
+                setTimeout(() => {
+                    inputArea.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                    // 动态调整聊天区域高度
+                    document.getElementById('chat').style.height = `calc(100vh - ${inputArea.offsetHeight + 20}px)`;
+                }, 300); // 延迟等待软键盘弹出
+            });
+
+            // 监听输入框失焦
+            messageInput.addEventListener('blur', () => {
+                // 恢复聊天区域高度
+                document.getElementById('chat').style.height = `calc(100vh - ${inputArea.offsetHeight}px)`;
+            });
+
+            // 监听窗口大小变化（例如键盘弹出/收起）
+            window.addEventListener('resize', () => {
+                if (document.activeElement === messageInput) {
+                    inputArea.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }
+            });
+        }
+
+        // 初始化调整输入区域
+        adjustInputArea();
     </script>
 </body>
 </html>
