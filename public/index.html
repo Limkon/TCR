@@ -153,7 +153,7 @@
                 position: fixed; 
                 top: 0; 
                 left: 0; 
-                transform: translateX(-100%); 
+                transform: translateX(0); /* 默认显示 */
                 z-index: 1000; 
                 background: #ffffff; 
                 padding: 20px; 
@@ -161,6 +161,9 @@
             }
             #left.active { 
                 transform: translateX(0); 
+            }
+            #left.hidden { 
+                transform: translateX(-100%); 
             }
             #right { 
                 width: 100%; 
@@ -323,7 +326,7 @@
     </style>
 </head>
 <body>
-    <div id="left">
+    <div id="left" class="active">
         <h3>在线用户</h3>
         <ul id="userList"></ul>
         <input type="text" id="username" placeholder="输入用户名">
@@ -331,7 +334,7 @@
         <button id="hide-users" onclick="toggleUserList()">隐藏用户</button>
     </div>
     <div id="right">
-        <button id="toggle-users" onclick="toggleUserList()">显示用户</button>
+        <button id="toggle-users" onclick="toggleUserList()">隐藏用户</button>
         <div id="chat"></div>
         <div id="input-area">
             <input type="text" id="message" placeholder="输入消息">
@@ -343,7 +346,8 @@
         console.log('房间 ID:', roomId);
 
         let ws;
-        let username;
+        let username = null;
+        let hasJoined = false; // 跟踪是否已加入
 
         function connectWebSocket(protocol) {
             const host = location.hostname;
@@ -369,6 +373,9 @@
             ws.onclose = () => {
                 console.log('WebSocket 已关闭');
                 document.getElementById('chat').innerHTML = '';
+                hasJoined = false; // 重置加入状态
+                username = null;
+                updateJoinButtonState();
             };
 
             ws.onmessage = (event) => {
@@ -410,15 +417,38 @@
         connectWebSocket(location.protocol === 'https:' ? 'wss' : 'ws');
 
         function joinChat() {
+            if (hasJoined) {
+                alert('您已加入聊天室，无法再次加入！');
+                return;
+            }
+
             username = document.getElementById('username').value.trim();
             console.log('点击加入, 用户名:', username);
             if (username && ws.readyState === WebSocket.OPEN) {
                 ws.send(JSON.stringify({ type: 'join', username }));
                 console.log('发送加入:', { type: 'join', username });
-                toggleUserList(); // 加入后自动隐藏用户列表
+                hasJoined = true;
+                updateJoinButtonState();
+                toggleUserList(); // 加入后隐藏用户列表
             } else {
                 console.log('未输入用户名或 WebSocket 未连接');
                 alert('请输入用户名或等待服务器连接');
+            }
+        }
+
+        function updateJoinButtonState() {
+            const joinButton = document.getElementById('join-btn');
+            const usernameInput = document.getElementById('username');
+            if (hasJoined) {
+                joinButton.disabled = true;
+                joinButton.style.background = '#6c757d';
+                joinButton.style.cursor = 'not-allowed';
+                usernameInput.disabled = true;
+            } else {
+                joinButton.disabled = false;
+                joinButton.style.background = '#28a745';
+                joinButton.style.cursor = 'pointer';
+                usernameInput.disabled = false;
             }
         }
 
@@ -444,9 +474,11 @@
 
         function toggleUserList() {
             const leftPanel = document.getElementById('left');
-            leftPanel.classList.toggle('active');
+            const isActive = leftPanel.classList.contains('active');
+            leftPanel.classList.toggle('active', !isActive);
+            leftPanel.classList.toggle('hidden', isActive);
             const toggleButton = document.getElementById('toggle-users');
-            toggleButton.textContent = leftPanel.classList.contains('active') ? '隐藏用户' : '显示用户';
+            toggleButton.textContent = isActive ? '显示用户' : '隐藏用户';
         }
 
         // 移动端软键盘处理
@@ -454,22 +486,17 @@
             const inputArea = document.getElementById('input-area');
             const messageInput = document.getElementById('message');
 
-            // 监听输入框聚焦
             messageInput.addEventListener('focus', () => {
                 setTimeout(() => {
                     inputArea.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                    // 动态调整聊天区域高度
                     document.getElementById('chat').style.height = `calc(100vh - ${inputArea.offsetHeight + 20}px)`;
-                }, 300); // 延迟等待软键盘弹出
+                }, 300);
             });
 
-            // 监听输入框失焦
             messageInput.addEventListener('blur', () => {
-                // 恢复聊天区域高度
                 document.getElementById('chat').style.height = `calc(100vh - ${inputArea.offsetHeight}px)`;
             });
 
-            // 监听窗口大小变化（例如键盘弹出/收起）
             window.addEventListener('resize', () => {
                 if (document.activeElement === messageInput) {
                     inputArea.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -477,8 +504,9 @@
             });
         }
 
-        // 初始化调整输入区域
+        // 初始化
         adjustInputArea();
+        updateJoinButtonState();
     </script>
 </body>
 </html>
