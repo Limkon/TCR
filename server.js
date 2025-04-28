@@ -18,11 +18,12 @@ wss.on('connection', (ws, req) => {
     const roomId = req.url.split('/')[1] || 'default';
     console.log(`新连接至房间: ${roomId}`);
 
+    // 初始化房间
     if (!chatRooms[roomId]) {
         chatRooms[roomId] = {
             users: [],
             messages: [],
-            timer: setInterval(() => clearChat(roomId), 600000)
+            timer: setInterval(() => clearChat(roomId), 600000) // 每10分钟清理一次
         };
     }
     const room = chatRooms[roomId];
@@ -32,10 +33,12 @@ wss.on('connection', (ws, req) => {
         try {
             const data = JSON.parse(message);
             if (data.type === 'join') {
+                // 重复用户名检测
                 if (room.users.includes(data.username)) {
-                    ws.send(JSON.stringify({ type: 'error', message: '用户名已被占用' }));
+                    ws.send(JSON.stringify({ type: 'joinError', message: '用户名已被占用' }));
                     console.log(`错误: 用户名 ${data.username} 在房间 ${roomId} 中已被占用`);
                 } else {
+                    // 添加新用户
                     room.users.push(data.username);
                     ws.username = data.username;
                     ws.roomId = roomId;
@@ -43,6 +46,7 @@ wss.on('connection', (ws, req) => {
                     broadcast(roomId, { type: 'userList', users: room.users });
                 }
             } else if (data.type === 'message') {
+                // 广播用户消息
                 room.messages.push({ username: ws.username, message: data.message });
                 console.log(`来自 ${ws.username} 在房间 ${roomId} 的消息: ${data.message}`);
                 broadcast(roomId, { type: 'message', username: ws.username, message: data.message });
@@ -55,14 +59,12 @@ wss.on('connection', (ws, req) => {
     ws.on('close', () => {
         console.log(`用户 ${ws.username} 在房间 ${ws.roomId} 的连接关闭`);
         if (ws.username && ws.roomId) {
-            if (ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify({ type: 'clearChatBeforeDisconnect' }));
-                console.log(`向 ${ws.username} 发送断开前清除聊天指令`);
-            }
-
+            // 从房间移除用户
             const room = chatRooms[ws.roomId];
             room.users = room.users.filter(user => user !== ws.username);
             broadcast(ws.roomId, { type: 'userList', users: room.users });
+
+            // 如果房间空了，销毁房间
             if (room.users.length === 0) {
                 clearInterval(room.timer);
                 delete chatRooms[ws.roomId];
