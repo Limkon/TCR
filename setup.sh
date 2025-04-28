@@ -36,7 +36,7 @@ handle_git_status() {
         echo "1) 备份未跟踪文件"
         echo "2) 删除未跟踪文件"
         echo "3) 退出以手动处理"
-        echo "4) 强制覆盖（警告：将丢失所有未提交的更改！）"
+        echo "4) 强制覆盖（警告：将丢失所有未提交的更改，若失败则跳过）"
         read -p "请输入选项 (1/2/3/4): " choice
         case $choice in
             1)
@@ -46,11 +46,15 @@ handle_git_status() {
                 git status --porcelain | grep "^??" | sed 's/^?? //' | while read -r file; do
                     cp -r "$file" "$backup_dir/"
                 done
-                git clean -f
+                git clean -f || {
+                    echo "⚠️ 删除未跟踪文件失败，继续执行后续操作..."
+                }
                 ;;
             2)
                 echo "🗑️ 删除未跟踪文件..."
-                git clean -f
+                git clean -f || {
+                    echo "⚠️ 删除未跟踪文件失败，继续执行后续操作..."
+                }
                 ;;
             3)
                 echo "🚪 退出脚本，请手动处理未跟踪文件后重新运行。"
@@ -61,9 +65,13 @@ handle_git_status() {
                 echo "⚠️ 警告：强制覆盖将删除所有未跟踪文件和本地修改！"
                 read -p "确认继续？(y/N): " confirm
                 if [ "$confirm" = "y" ] || [ "$confirm" = "Y" ]; then
-                    echo "🔄 强制覆盖本地更改..."
-                    git reset --hard
-                    git clean -fd
+                    echo "🔄 尝试强制覆盖本地更改..."
+                    git reset --hard || {
+                        echo "⚠️ 重置本地修改失败，跳过并继续执行后续操作..."
+                    }
+                    git clean -fd || {
+                        echo "⚠️ 删除未跟踪文件失败，跳过并继续执行后续操作..."
+                    }
                 else
                     echo "🚪 已取消强制覆盖，退出。"
                     exit 1
@@ -86,9 +94,8 @@ if [ -d "$PROJECT_DIR/.git" ]; then
     cd "$PROJECT_DIR"
     handle_git_status
     git pull origin "$DEFAULT_BRANCH" || {
-        echo "❌ 无法更新仓库，请检查 Git 配置或手动运行以下命令："
-        echo "cd $PROJECT_DIR && git config --global --add safe.directory $PROJECT_DIR && git pull origin $DEFAULT_BRANCH"
-        exit 1
+        echo "⚠️ 无法更新仓库，跳过并继续执行后续操作..."
+        echo "建议手动运行：cd $PROJECT_DIR && git config --global --add safe.directory $PROJECT_DIR && git pull origin $DEFAULT_BRANCH"
     }
 else
     # 检查是否存在 TCR 项目文件（如 package.json）以避免重复克隆
@@ -100,24 +107,25 @@ else
         git fetch origin
         handle_git_status
         git checkout "$DEFAULT_BRANCH" -- . || {
-            echo "❌ 无法检出 $DEFAULT_BRANCH 分支，请检查仓库分支。"
-            exit 1
+            echo "⚠️ 无法检出 $DEFAULT_BRANCH 分支，跳过并继续执行后续操作..."
         }
     else
         # 克隆 TCR 项目到临时目录，然后复制文件到当前目录
         echo "📥 追加 TCR 项目到当前目录（覆盖同名文件）..."
         TEMP_DIR=$(mktemp -d)
-        git clone "$REPO_URL" "$TEMP_DIR"
+        git clone "$REPO_URL" "$TEMP_DIR" || {
+            echo "⚠️ 克隆仓库失败，跳过并继续执行后续操作..."
+            rm -rf "$TEMP_DIR"
+        }
         # 复制所有文件（包括隐藏文件）到当前目录，强制覆盖同名文件
-        cp -rf "$TEMP_DIR"/. "$PROJECT_DIR"
+        cp -rf "$TEMP_DIR"/. "$PROJECT_DIR" 2>/dev/null || true
         # 初始化 Git 仓库
         cd "$PROJECT_DIR"
         git init 2>/dev/null || true
-        git remote add origin "$REPO_URL"
-        git fetch origin
-        git checkout "$DEFAULT_BRANCH" -- . || {
-            echo "❌ 无法检出 $DEFAULT_BRANCH 分支，请检查仓库分支。"
-            exit 1
+        git remote add origin "$REPO_URL" 2>/dev/null || true
+        git fetch origin 2>/dev/null || true
+        git checkout "$DEFAULT_BRANCH" -- . 2>/dev/null || {
+            echo "⚠️ 无法检出 $DEFAULT_BRANCH 分支，跳过并继续执行后续操作..."
         }
         rm -rf "$TEMP_DIR"
     fi
@@ -128,12 +136,16 @@ if ! command -v node &> /dev/null
 then
     echo "🔧 Node.js 未检测到，开始安装 nvm 和 Node.js..."
     # 安装 nvm 到当前目录
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | NVM_DIR="$PROJECT_DIR/.nvm" bash
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | NVM_DIR="$PROJECT_DIR/.nvm" bash || {
+        echo "⚠️ 安装 nvm 失败，尝试继续..."
+    }
     # 加载 nvm
     export NVM_DIR="$PROJECT_DIR/.nvm"
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
     # 安装 Node.js 18
-    nvm install 18
+    nvm install 18 || {
+        echo "⚠️ 安装 Node.js 18 失败，尝试继续..."
+    }
 else
     echo "✅ Node.js 已安装，版本：$(node -v)"
 fi
@@ -144,10 +156,14 @@ export NVM_DIR="$PROJECT_DIR/.nvm"
 
 # 安装项目依赖
 echo "📦 安装 npm 依赖..."
-npm install
+npm install || {
+    echo "⚠️ 安装 npm 依赖失败，尝试继续..."
+}
 
 # 创建 autostart 文件夹
-mkdir -p "$HOME/.config/autostart"
+mkdir -p "$HOME/.config/autostart" || {
+    echo "⚠️ 创建 autostart 目录失败，尝试继续..."
+}
 
 # 写开机启动的 .desktop 文件
 echo "🛠️ 配置开机启动..."
@@ -164,3 +180,4 @@ EOF
 
 echo "🎉 安装完成！下次开机登录后会自动启动 TCR 聊天室服务器！"
 echo "📍 项目目录: $PROJECT_DIR"
+echo "⚠️ 注意：部分操作可能失败，请检查日志并手动修复（如 git pull 或 npm install）。"
