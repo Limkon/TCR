@@ -3,8 +3,8 @@ markdown
 # 聊天室应用
 
 这是一个基于 Node.js 和 WebSocket 的实时纯文字聊天室应用（免费服务器空间有限），支持多用户聊天、回车键发送消息，以及在与服务器断开连接前清除客户端聊天内容。输入网址后加入/XXX即生成一个专属聊天室(https://chat.svip.san.tc/9527)  新用户进入后不能查看之前的消息，在所有用户离开后自动销毁，同时如果用户长时间不活跃也自动退出，重在保秘，懂得都懂。以下是部署和运行说明。
-支持alwaysdata空间一键安装[https://www.alwaysdata.com/en/] 
-     ```bash
+支持alwaysdata空间一键安装[https://www.alwaysdata.com/en/]
+    ```bash
      bash <(wget -qO- https://raw.githubusercontent.com/Limkon/TCR/refs/heads/master/setup.sh)
      
 ## 项目结构
