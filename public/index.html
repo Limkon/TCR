@@ -270,6 +270,11 @@
                 sendMessage();
             }
         });
+
+        // 每10分钟清聊天内容
+        setInterval(() => {
+        document.getElementById('chat').innerHTML = '';
+        }, 600000);
     </script>
 </body>
 </html>
