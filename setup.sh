@@ -6,7 +6,7 @@ echo "开始安装 TCR 聊天室项目..."
 # 获取当前目录
 PROJECT_DIR=$(pwd)
 
-# 清理本地 Git 仓库（强制忽略本地是否为仓库）
+# 清理本地 Git 仓库（如果存在）
 echo "清理本地 Git 仓库（如果存在）..."
 rm -rf "$PROJECT_DIR/.git"
 
@@ -21,16 +21,11 @@ curl -L https://github.com/Limkon/TCR/archive/refs/heads/master.tar.gz | tar -xz
 cp -rf "$TEMP_DIR"/. "$PROJECT_DIR"
 rm -rf "$TEMP_DIR"
 
-# 初始化 Git 仓库（仅用于后续更新）
-echo "初始化 Git 仓库以便后续更新..."
+# 初始化 Git 仓库（仅用于记录、后续 pull）
+echo "初始化 Git 仓库（不 checkout）..."
 cd "$PROJECT_DIR"
 git init -q
 git remote add origin https://github.com/Limkon/TCR.git
-git fetch origin -q
-git checkout master -q || {
-    echo "无法检出 master 分支，请检查远程仓库分支。"
-    exit 1
-}
 
 # 检查 Node.js 是否安装
 if ! command -v node &> /dev/null; then
