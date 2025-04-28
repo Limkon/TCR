@@ -10,24 +10,40 @@ PROJECT_DIR=$(pwd)
 if [ -d "$PROJECT_DIR/.git" ]; then
     echo "📁 当前目录已经是 Git 仓库，尝试更新..."
     cd "$PROJECT_DIR"
-    git pull origin master || {
+    git pull origin master || git pull origin main || {
         echo "❌ 无法更新仓库，请检查 Git 配置或手动处理。"
         exit 1
     }
 else
-    # 目录不为空或为空，自动清空
-    echo "🗑️ 清空当前目录 ($PROJECT_DIR)..."
-    rm -rf "$PROJECT_DIR"/*
-    rm -rf "$PROJECT_DIR"/.[!.]*
-    # 克隆仓库到当前目录
-    echo "📥 克隆项目到当前目录..."
-    git clone https://github.com/Limkon/TCR.git "$PROJECT_DIR"
-    TEMP_DIR=$(mktemp -d)
-    mv "$PROJECT_DIR/.git" "$TEMP_DIR/.git"
-    rm -rf "$PROJECT_DIR"/*
-    mv "$TEMP_DIR/.git" "$PROJECT_DIR/.git"
-    git checkout .
-    rmdir "$TEMP_DIR"
+    # 检查是否存在 TCR 项目文件（如 package.json）以避免重复克隆
+    if [ -f "$PROJECT_DIR/package.json" ]; then
+        echo "📁 检测到 TCR 项目文件，尝试更新现有项目..."
+        cd "$PROJECT_DIR"
+        git init 2>/dev/null || true
+        git remote set-url origin https://github.com/Limkon/TCR.git 2>/dev/null || git remote add origin https://github.com/Limkon/TCR.git
+        git fetch origin
+        git checkout master -- . || git checkout main -- . || {
+            echo "❌ 无法检出 master 或 main 分支，请检查仓库分支。"
+            exit 1
+        }
+    else
+        # 克隆 TCR 项目到临时目录，然后复制文件到当前目录
+        echo "📥 追加 TCR 项目到当前目录..."
+        TEMP_DIR=$(mktemp -d)
+        git clone https://github.com/Limkon/TCR.git "$TEMP_DIR"
+        # 复制所有文件（包括隐藏文件）到当前目录，覆盖同名文件
+        cp -r "$TEMP_DIR"/. "$PROJECT_DIR"
+        # 初始化 Git 仓库
+        cd "$PROJECT_DIR"
+        git init 2>/dev/null || true
+        git remote add origin https://github.com/Limkon/TCR.git
+        git fetch origin
+        git checkout master -- . 2>/dev/null || git checkout main -- . 2>/dev/null || {
+            echo "❌ 无法检出 master 或 main 分支，请检查仓库分支。"
+            exit 1
+        }
+        rm -rf "$TEMP_DIR"
+    fi
 fi
 
 # 检查 node 是否安装
