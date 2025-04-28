@@ -1,301 +1,204 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>聊天室</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { 
-            height: 100%; 
-            width: 100%; 
-            overflow: hidden; 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
-        }
-        body { 
-            display: flex; 
-            flex-direction: row; 
-        }
-        #left { 
-            width: 250px; 
-            background: #f5f5f5; 
-            padding: 20px; 
-            border-right: 1px solid #ccc; 
-            overflow-y: auto; 
-            transition: transform 0.3s ease; 
-        }
-        #right { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            min-height: 0; 
-            overflow: hidden;
-        }
-        #chat { 
-            flex: 1; 
-            padding: 15px; 
-            overflow-y: auto; 
-            background: #fff; 
-        }
-        #chat p { 
-            margin-bottom: 10px; 
-            padding: 10px; 
-            background: #e9ecef; 
-            border-radius: 8px; 
-            max-width: 75%; 
-            word-wrap: break-word; 
-            font-size: 16px; 
-            line-height: 1.4; 
-        }
-        #input-area { 
-            padding: 10px; 
-            background: #f5f5f5; 
-            border-top: 1px solid #ccc; 
-            display: flex; 
-            align-items: center; 
-        }
-        #message { 
-            flex: 1; 
-            padding: 12px; 
-            border: 1px solid #ccc; 
-            border-radius: 8px; 
-            margin-right: 10px; 
-            font-size: 16px; 
-        }
-        #send-btn { 
-            padding: 12px 20px; 
-            background: #007bff; 
-            color: white; 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-size: 16px; 
-        }
-        #send-btn:hover { 
-            background: #0056b3; 
-        }
-        #left h3 { 
-            margin-bottom: 20px; 
-            font-size: 20px; 
-            white-space: nowrap; 
-        }
-        #userList li { 
-            list-style: none; 
-            padding: 10px 0; 
-            font-size: 18px; 
-        }
-        #username, #join-btn, #hide-users-btn { 
-            width: 100%; 
-            margin-bottom: 10px; 
-            padding: 12px; 
-            border-radius: 8px; 
-            font-size: 18px; 
-        }
-        #username { 
-            border: 1px solid #ccc; 
-        }
-        #join-btn { 
-            background: #28a745; 
-            color: white; 
-            border: none; 
-            cursor: pointer; 
-        }
-        #join-btn:hover { 
-            background: #218838; 
-        }
-        #hide-users-btn { 
-            background: #007bff; 
-            color: white; 
-            border: none; 
-            cursor: pointer; 
-        }
-        #hide-users-btn:hover { 
-            background: #0056b3; 
-        }
-        #toggle-users { 
-            display: none; 
-            padding: 12px; 
-            background: #007bff; 
-            color: white; 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            margin: 10px; 
-            font-size: 16px; 
-            align-self: flex-start; 
-        }
-        #toggle-users:hover { 
-            background: #0056b3; 
-        }
-        @media (max-width: 768px) {
-            html, body {
-                height: auto;
-                min-height: 100vh;
-                overflow: auto;
-            }
-            body { 
-                flex-direction: column; 
-            }
-            #left { 
-                width: 75%; 
-                min-width: 300px; 
-                max-width: 400px; 
-                height: 100vh; 
-                position: fixed; 
-                top: 0; 
-                left: 0; 
-                transform: translateX(-100%); 
-                z-index: 1000; 
-                background: #ffffff; 
-                box-shadow: 2px 0 5px rgba(0,0,0,0.2); 
-            }
-            #left.active { 
-                transform: translateX(0); 
-            }
-            #right { 
-                width: 100%; 
-                height: 100vh; 
-            }
-            #chat { 
-                flex: 1;
-                min-height: 200px;
-                overflow-y: auto;
-                padding: 10px;
-            }
-            #input-area { 
-                padding: 10px; 
-                background: #ffffff; 
-            }
-            #toggle-users { 
-                display: block; 
-                margin: 10px; 
-                border-radius: 20px; 
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>聊天室</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; width: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; }
+body { display: flex; }
+#left { 
+    width: 250px; 
+    background: #f5f5f5; 
+    padding: 20px; 
+    border-right: 1px solid #ccc; 
+    overflow-y: auto; 
+    position: relative;
+    transition: transform 0.3s ease;
+}
+#left.hidden { 
+    transform: translateX(-100%); 
+}
+#toggle-users { 
+    position: absolute; 
+    top: 20px; 
+    left: 100%; 
+    transform: rotate(-90deg) translateX(-50%); 
+    transform-origin: left top; 
+    background: #007bff; 
+    color: white; 
+    border: none; 
+    border-radius: 8px; 
+    padding: 8px 12px; 
+    cursor: pointer; 
+    font-size: 14px; 
+    z-index: 1000;
+}
+#toggle-users:hover { background: #0056b3; }
+#right { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+#chat { flex: 1; padding: 15px; overflow-y: auto; background: #fff; }
+#chat p { margin-bottom: 10px; padding: 10px; background: #e9ecef; border-radius: 8px; max-width: 75%; word-wrap: break-word; font-size: 16px; line-height: 1.4; }
+#input-area { padding: 10px; background: #f5f5f5; display: flex; align-items: center; border-top: 1px solid #ccc; }
+#message { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 8px; margin-right: 10px; font-size: 16px; }
+#send-btn { padding: 12px 20px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; }
+#send-btn:hover { background: #0056b3; }
+#left h3 { margin-bottom: 20px; font-size: 20px; }
+#userList li { list-style: none; padding: 10px 0; font-size: 18px; }
+#username { width: 100%; padding: 12px; margin: 20px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 18px; }
+#join-btn { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; }
+#join-btn:hover { background: #218838; }
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+    body { flex-direction: column; }
+    #left { 
+        width: 100%; 
+        height: 100vh; 
+        position: fixed; 
+        top: 0; 
+        left: 0; 
+        transform: translateX(-100%); 
+        z-index: 1000; 
+        background: #ffffff; 
+        box-shadow: 2px 0 5px rgba(0,0,0,0.2); 
+    }
+    #left.hidden { 
+        transform: translateX(-100%); 
+    }
+    #toggle-users {
+        top: 20px;
+        left: 10px;
+        transform: none;
+        position: fixed;
+    }
+    #right { height: calc(100vh - 70px); }
+    #chat { padding: 10px; }
+    #input-area { height: 70px; background: #ffffff; padding: 8px; }
+    #message { font-size: 14px; padding: 10px; border-radius: 20px; }
+    #send-btn { padding: 10px 15px; font-size: 14px; border-radius: 20px; }
+    #username { font-size: 16px; padding: 12px; }
+    #join-btn { font-size: 16px; padding: 12px; }
+}
+</style>
 </head>
 <body>
-    <div id="left">
-        <h3>在线用户</h3>
-        <ul id="userList"></ul>
-        <input type="text" id="username" placeholder="输入用户名">
-        <button id="join-btn" onclick="joinChat()">加入</button>
-        <button id="hide-users-btn" onclick="toggleUserList()">隐藏用户</button>
+<div id="left" class="hidden">
+    <button id="toggle-users" onclick="toggleUserList()">显示用户</button>
+    <h3>在线用户</h3>
+    <ul id="userList"></ul>
+    <input type="text" id="username" placeholder="输入用户名">
+    <button id="join-btn" onclick="joinChat()">加入</button>
+</div>
+<div id="right">
+    <div id="chat"></div>
+    <div id="input-area">
+        <input type="text" id="message" placeholder="输入消息">
+        <button id="send-btn" onclick="sendMessage()">发送</button>
     </div>
-    <div id="right">
-        <button id="toggle-users" onclick="toggleUserList()">显示用户</button>
-        <div id="chat"></div>
-        <div id="input-area">
-            <input type="text" id="message" placeholder="输入消息">
-            <button id="send-btn" onclick="sendMessage()">发送</button>
-        </div>
-    </div>
+</div>
 
-    <script>
-        const roomId = location.pathname.split('/')[1] || 'default';
-        console.log('房间 ID:', roomId);
+<script>
+const roomId = location.pathname.split('/')[1] || 'default';
+let ws;
+let username;
+let joined = false;
 
-        let ws;
-        let username;
+function connectWebSocket(protocol) {
+    const host = location.hostname;
+    const port = location.port || (location.protocol === 'https:' ? '443' : '80');
+    const wsUrl = `${protocol}://${host}:${port}/${roomId}`;
+    ws = new WebSocket(wsUrl);
 
-        function connectWebSocket(protocol) {
-            const host = location.hostname;
-            const port = location.port || (location.protocol === 'https:' ? '443' : '80');
-            const wsUrl = `${protocol}://${host}:${port}/${roomId}`;
-            console.log('尝试 WebSocket URL:', wsUrl);
-            ws = new WebSocket(wsUrl);
+    ws.onopen = () => {
+        console.log('WebSocket 已连接');
+    };
 
-            ws.onopen = () => {
-                console.log('WebSocket 已连接');
-            };
+    ws.onerror = (error) => {
+        console.error('WebSocket 错误:', error);
+        if (protocol === 'wss') {
+            connectWebSocket('ws');
+        } else {
+            alert('无法连接到聊天服务器，请检查网络或稍后重试');
+        }
+    };
 
-            ws.onerror = (error) => {
-                console.error('WebSocket 错误:', error);
-                if (protocol === 'wss') {
-                    console.log('WSS 失败，尝试 WS');
-                    connectWebSocket('ws');
-                } else {
-                    alert('无法连接到聊天服务器，请检查网络或稍后重试');
-                }
-            };
+    ws.onclose = () => {
+        console.log('WebSocket 已关闭');
+        document.getElementById('chat').innerHTML = '';
+    };
 
-            ws.onclose = () => {
-                console.log('WebSocket 已关闭');
+    ws.onmessage = (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'userList') {
+                const userList = document.getElementById('userList');
+                userList.innerHTML = '';
+                data.users.forEach(user => {
+                    const li = document.createElement('li');
+                    li.textContent = user;
+                    userList.appendChild(li);
+                });
+            } else if (data.type === 'message') {
+                const chat = document.getElementById('chat');
+                const p = document.createElement('p');
+                p.textContent = `${data.username}: ${data.message}`;
+                chat.appendChild(p);
+                chat.scrollTop = chat.scrollHeight;
+            } else if (data.type === 'clearChat') {
                 document.getElementById('chat').innerHTML = '';
-            };
-
-            ws.onmessage = (event) => {
-                console.log('从服务器收到:', event.data);
-                try {
-                    const data = JSON.parse(event.data);
-                    if (data.type === 'userList') {
-                        const userList = document.getElementById('userList');
-                        userList.innerHTML = '';
-                        data.users.forEach(user => {
-                            const li = document.createElement('li');
-                            li.textContent = user;
-                            userList.appendChild(li);
-                        });
-                    } else if (data.type === 'message') {
-                        const chat = document.getElementById('chat');
-                        const p = document.createElement('p');
-                        p.textContent = `${data.username}: ${data.message}`;
-                        chat.appendChild(p);
-                        chat.scrollTop = chat.scrollHeight;
-                    } else if (data.type === 'clearChat' || data.type === 'clearChatBeforeDisconnect') {
-                        document.getElementById('chat').innerHTML = '';
-                    } else if (data.type === 'error') {
-                        alert(data.message);
-                    }
-                } catch (error) {
-                    console.error('消息解析错误:', error);
-                }
-            };
-        }
-
-        connectWebSocket(location.protocol === 'https:' ? 'wss' : 'ws');
-
-        function joinChat() {
-            if (username) {
-                alert('你已经加入了聊天室');
-                return;
+            } else if (data.type === 'error') {
+                alert(data.message);
             }
-            username = document.getElementById('username').value.trim();
-            if (username && ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify({ type: 'join', username }));
-                document.getElementById('username').disabled = true;
-                document.getElementById('join-btn').disabled = true;
-            } else {
-                alert('请输入用户名或等待服务器连接');
-            }
+        } catch (error) {
+            console.error('消息解析错误:', error);
         }
+    };
+}
 
-        function sendMessage() {
-            const message = document.getElementById('message').value.trim();
-            if (message && username && ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify({ type: 'message', message }));
-                document.getElementById('message').value = '';
-            } else {
-                alert('请先加入聊天室、输入消息或等待服务器连接');
-            }
-        }
+connectWebSocket(location.protocol === 'https:' ? 'wss' : 'ws');
 
-        document.getElementById('message').addEventListener('keypress', (event) => {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                sendMessage();
-            }
-        });
+function toggleUserList() {
+    const leftPanel = document.getElementById('left');
+    const toggleButton = document.getElementById('toggle-users');
+    leftPanel.classList.toggle('hidden');
+    if (leftPanel.classList.contains('hidden')) {
+        toggleButton.textContent = '显示用户';
+    } else {
+        toggleButton.textContent = '隐藏用户';
+    }
+}
 
-        function toggleUserList() {
-            const leftPanel = document.getElementById('left');
-            leftPanel.classList.toggle('active');
-            const toggleButton = document.getElementById('toggle-users');
-            const hideButton = document.getElementById('hide-users-btn');
-            const isActive = leftPanel.classList.contains('active');
-            toggleButton.textContent = isActive ? '隐藏用户' : '显示用户';
-            hideButton.textContent = isActive ? '隐藏用户' : '显示用户';
-        }
-    </script>
+function joinChat() {
+    if (joined) {
+        alert('您已经加入过了');
+        return;
+    }
+    username = document.getElementById('username').value.trim();
+    if (username && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'join', username }));
+        joined = true;
+    } else {
+        alert('请输入用户名或等待服务器连接');
+    }
+}
+
+function sendMessage() {
+    const message = document.getElementById('message').value.trim();
+    if (message && username && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'message', message }));
+        document.getElementById('message').value = '';
+    } else {
+        alert('请先加入聊天室、输入消息或等待服务器连接');
+    }
+}
+
+document.getElementById('message').addEventListener('keypress', (event) => {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        sendMessage();
+    }
+});
+</script>
 </body>
 </html>
