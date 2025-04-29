@@ -62,6 +62,10 @@ wss.on('connection', (ws, req) => {
             // 从房间移除用户
             const room = chatRooms[ws.roomId];
             room.users = room.users.filter(user => user !== ws.username);
+            
+            // 广播清理聊天记录和用户列表
+            room.messages = [];
+            broadcast(ws.roomId, { type: 'clearChatBeforeDisconnect', message: `已清理房间 ${ws.roomId} 的聊天记录` });
             broadcast(ws.roomId, { type: 'userList', users: room.users });
 
             // 如果房间空了，销毁房间
@@ -88,7 +92,7 @@ function clearChat(roomId) {
     if (room) {
         room.messages = [];
         console.log(`已清理房间 ${roomId} 的聊天记录`);
-        broadcast(roomId, { type: 'clearChat' });
+        broadcast(roomId, { type: 'clearChat', message: `已清理房间 ${roomId} 的聊天记录` });
     }
 }
 
