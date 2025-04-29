@@ -38,12 +38,12 @@ wss.on('connection', (ws, req) => {
                     console.log(`错误: 用户名 ${data.username} 在房间 ${roomId} 中已被占用`);
                     ws.send(JSON.stringify({ type: 'joinError', message: '用户名已被占用' }));
                 } else {
-                    // 添加新用户
-                    room.users = room.users.filter(user => user !== null); // 清理 null 值
+                    // 清理 null 值并添加新用户
+                    room.users = room.users.filter(user => user !== null);
                     room.users.push(data.username);
                     ws.username = data.username;
                     ws.roomId = roomId;
-                    console.log(`用户 ${data.username} 加入房间 ${roomId}`);
+                    console.log(`用户 ${data.username} 加入房间 ${roomId}, 当前用户列表: ${room.users}`);
                     // 广播用户列表
                     broadcast(roomId, { type: 'userList', users: room.users });
                     // 通知客户端加入成功
@@ -64,9 +64,10 @@ wss.on('connection', (ws, req) => {
     ws.on('close', () => {
         console.log(`用户 ${ws.username} 在房间 ${ws.roomId} 的连接关闭`);
         if (ws.username && ws.roomId) {
-            // 从房间移除用户
+            // 从房间移除用户并清理 null 值
             const room = chatRooms[ws.roomId];
-            room.users = room.users.filter(user => user !== ws.username && user !== null); // 清理 null 值
+            room.users = room.users.filter(user => user !== ws.username && user !== null);
+            console.log(`用户 ${ws.username} 离开，更新用户列表: ${room.users}`);
             // 广播清理聊天记录和用户列表
             room.messages = [];
             broadcast(ws.roomId, { type: 'clearChatBeforeDisconnect', message: `已清理房间 ${ws.roomId} 的聊天记录` });
