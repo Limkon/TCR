@@ -14,6 +14,7 @@ function connect() {
     ws.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data);
+            console.log('收到消息:', data); // 调试日志
             switch (data.type) {
                 case 'userList':
                     updateUserList(data.users);
@@ -21,7 +22,18 @@ function connect() {
                 case 'message':
                     addMessage(data.username, data.message);
                     break;
+                case 'joinSuccess':
+                    console.log('加入成功，启用消息输入框'); // 调试日志
+                    joined = true;
+                    document.getElementById('message').disabled = false;
+                    document.getElementById('send').disabled = false;
+                    // 确保用户名输入框、标签和加入按钮保持隐藏
+                    document.getElementById('username-label').style.display = 'none';
+                    document.getElementById('username').style.display = 'none';
+                    document.getElementById('join').style.display = 'none';
+                    break;
                 case 'joinError':
+                    console.log('加入失败:', data.message); // 调试日志
                     alert(data.message || '用户名已存在，请重新输入');
                     joined = false;
                     username = '';
@@ -30,7 +42,7 @@ function connect() {
                     document.getElementById('username-label').style.display = 'block';
                     document.getElementById('username').style.display = 'block';
                     document.getElementById('join').style.display = 'block';
-                    // 禁用消息输入框和发送按钮
+                    // 确保消息输入框和发送按钮禁用
                     document.getElementById('message').disabled = true;
                     document.getElementById('send').disabled = true;
                     break;
@@ -77,6 +89,7 @@ document.getElementById('join').onclick = () => {
         alert('已加入聊天室');
         return;
     }
+    console.log('尝试加入，用户名:', name); // 调试日志
     username = name;
     ws.send(JSON.stringify({ type: 'join', username }));
     // 临时隐藏用户名输入框、标签和加入按钮，等待服务器确认
