@@ -29,7 +29,8 @@ wss.on('connection', (ws, req) => {
     const room = chatRooms[roomId];
 
     ws.on('message', (message) => {
-        console.log('收到消息:', message.toString());
+        // 禁用明文消息日志，仅记录事件
+        console.log(`收到消息事件: 房间 ${roomId}`);
         try {
             const data = JSON.parse(message);
             if (data.type === 'join') {
@@ -51,9 +52,9 @@ wss.on('connection', (ws, req) => {
                     ws.send(JSON.stringify({ type: 'joinSuccess', message: '加入成功' }));
                 }
             } else if (data.type === 'message') {
-                // 广播用户消息
+                // 存储并广播消息，不记录消息内容
                 room.messages.push({ username: ws.username, message: data.message });
-                console.log(`来自 ${ws.username} 在房间 ${roomId} 的消息: ${data.message}`);
+                console.log(`来自 ${ws.username} 在房间 ${roomId} 的消息事件`);
                 broadcast(roomId, { type: 'message', username: ws.username, message: data.message });
             }
         } catch (error) {
@@ -84,7 +85,7 @@ wss.on('connection', (ws, req) => {
 });
 
 function broadcast(roomId, data) {
-    console.log(`广播至房间 ${roomId}:`, data);
+    console.log(`广播至房间 ${roomId}: 类型 ${data.type}`);
     if (data && typeof data === 'object') {
         wss.clients.forEach(client => {
             if (client.roomId === roomId && client.readyState === WebSocket.OPEN) {
