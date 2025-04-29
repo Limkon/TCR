@@ -65,9 +65,16 @@ footer label {
 }
 
 footer input[type="text"] {
-    flex: 1;
     padding: 8px;
     margin-right: 10px;
+}
+
+footer #username {
+    width: 150px; /* 缩短用户名输入框 */
+}
+
+footer #message {
+    flex: 1; /* 消息输入框占据剩余空间，相对延长 */
 }
 
 footer button {
