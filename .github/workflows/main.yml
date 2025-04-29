@@ -14,12 +14,10 @@ jobs:
       - name: Get latest release tag
         id: get_latest_tag
         run: |
-          # 获取最新 tag（如果没有就从 v1.0.0 开始）
           LATEST_TAG=$(git tag --sort=-v:refname | head -n 1)
           if [[ -z "$LATEST_TAG" ]]; then
             NEW_TAG="v1.0.0"
           else
-            # 拆分版本号 v1.0.3 -> 1 0 3
             VERSION=${LATEST_TAG#v}
             IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
             PATCH=$((PATCH + 1))
@@ -29,10 +27,10 @@ jobs:
           echo "Latest tag: $LATEST_TAG"
           echo "Next tag: $NEW_TAG"
 
-      - name: Zip files (excluding .git, .github, dist)
+      - name: Zip files cleanly (excluding .git, .github, dist)
         run: |
           mkdir -p dist
-          zip -r ./dist/source.zip . -x ".git/**" ".github/**" "dist/**"
+          find . -type f ! -path "./.git/*" ! -path "./.github/*" ! -path "./dist/*" | zip -@ ./dist/source.zip
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
