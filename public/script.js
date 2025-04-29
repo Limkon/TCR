@@ -28,10 +28,11 @@ function connect() {
                     document.getElementById('username').value = '';
                     break;
                 case 'clearChat':
-                    clearChatWithTip();
+                    clearChatWithTip(roomId);
                     break;
                 case 'clearChatBeforeDisconnect':
-                    clearChatWithTip();
+                    clearChatWithTip(roomId);
+                    updateUserList([]); // 清空用户列表
                     break;
                 default:
                     console.warn('未知消息类型:', data);
@@ -44,6 +45,12 @@ function connect() {
 
     ws.onclose = () => {
         console.log('连接关闭');
+        clearChatWithTip(roomId); // 客户端本地清理聊天记录
+        updateUserList([]); // 客户端本地清理用户列表
+        joined = false;
+        username = '';
+        document.getElementById('message').disabled = true;
+        document.getElementById('send').disabled = true;
     };
 }
 
@@ -115,12 +122,12 @@ function updateUserList(users) {
 }
 
 // 清空聊天并提示
-function clearChatWithTip() {
+function clearChatWithTip(roomId) {
     const chat = document.getElementById('chat');
     chat.innerHTML = '';
     const tip = document.createElement('div');
     tip.className = 'message-left';
-    tip.textContent = '系统提示：聊天记录已清空';
+    tip.textContent = `系统提示：已清理房间 ${roomId} 的聊天记录`;
     chat.appendChild(tip);
 }
 
