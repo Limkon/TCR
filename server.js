@@ -43,7 +43,10 @@ wss.on('connection', (ws, req) => {
                     ws.username = data.username;
                     ws.roomId = roomId;
                     console.log(`用户 ${data.username} 加入房间 ${roomId}`);
+                    // 广播用户列表，触发客户端更新
                     broadcast(roomId, { type: 'userList', users: room.users });
+                    // 通知客户端加入成功
+                    ws.send(JSON.stringify({ type: 'joinSuccess' }));
                 }
             } else if (data.type === 'message') {
                 // 广播用户消息
