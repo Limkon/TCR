@@ -163,7 +163,7 @@ function clearChatWithTip(roomId) {
     const tip = document.createElement('div');
     tip.className = 'message-left';
     tip.textContent = `系统提示：已清理房间 ${roomId} 的聊天记录`;
-    chat.appendChild(tip); // 修复拼写错误：chopchat -> chat
+    chat.appendChild(tip);
 }
 
 connect();
