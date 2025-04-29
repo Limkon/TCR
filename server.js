@@ -35,18 +35,19 @@ wss.on('connection', (ws, req) => {
             if (data.type === 'join') {
                 // 重复用户名检测
                 if (room.users.includes(data.username)) {
-                    ws.send(JSON.stringify({ type: 'joinError', message: '用户名已被占用' }));
                     console.log(`错误: 用户名 ${data.username} 在房间 ${roomId} 中已被占用`);
+                    ws.send(JSON.stringify({ type: 'joinError', message: '用户名已被占用' }));
                 } else {
                     // 添加新用户
                     room.users.push(data.username);
                     ws.username = data.username;
                     ws.roomId = roomId;
                     console.log(`用户 ${data.username} 加入房间 ${roomId}`);
-                    // 广播用户列表，触发客户端更新
+                    // 广播用户列表
                     broadcast(roomId, { type: 'userList', users: room.users });
                     // 通知客户端加入成功
-                    ws.send(JSON.stringify({ type: 'joinSuccess' }));
+                    console.log(`发送 joinSuccess 给 ${data.username}`);
+                    ws.send(JSON.stringify({ type: 'joinSuccess', message: '加入成功' }));
                 }
             } else if (data.type === 'message') {
                 // 广播用户消息
