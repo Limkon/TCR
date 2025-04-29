@@ -109,4 +109,61 @@ document.getElementById('join').onclick = () => {
 };
 
 // 发送消息
-document.getElementById('send
+document.getElementById('send').onclick = () => {
+    const input = document.getElementById('message');
+    const msg = input.value.trim();
+    if (!msg) return;
+    ws.send(JSON.stringify({ type: 'message', message: msg }));
+    input.value = '';
+};
+
+// 回车键快捷发送
+document.getElementById('message').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        document.getElementById('send').click();
+    }
+});
+
+// 主题切换
+document.getElementById('theme-toggle').onclick = () => {
+    document.body.classList.toggle('dark-mode');
+    document.body.classList.toggle('light-mode');
+};
+
+// 用户列表显示切换
+document.getElementById('userlist-toggle').onclick = () => {
+    document.getElementById('userlist').classList.toggle('hidden');
+};
+
+// 添加聊天消息
+function addMessage(user, message) {
+    const chat = document.getElementById('chat');
+    const div = document.createElement('div');
+    div.className = user === username ? 'message-right' : 'message-left';
+    div.textContent = `${user}: ${message}`;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+// 更新在线用户列表
+function updateUserList(users) {
+    const list = document.getElementById('userlist');
+    list.innerHTML = '<h3>在线用户</h3>';
+    users.filter(user => user !== null).forEach(user => {
+        const div = document.createElement('div');
+        div.textContent = user;
+        list.appendChild(div);
+    });
+}
+
+// 清空聊天并提示
+function clearChatWithTip(roomId) {
+    const chat = document.getElementById('chat');
+    chat.innerHTML = '';
+    const tip = document.createElement('div');
+    tip.className = 'message-left';
+    tip.textContent = `系统提示：已清理房间 ${roomId} 的聊天记录`;
+    chat.appendChild(tip); // 修复拼写错误：chopchat -> chat
+}
+
+connect();
