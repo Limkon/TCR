@@ -5,7 +5,7 @@ let joined = false;
 // 连接 WebSocket
 function connect() {
     const roomId = location.pathname.split('/')[1] || 'default';
-    ws = new WebSocket(`ws://${location.host}/${roomId}`);
+    ws = new WebSocket(`wss://${location.host}/${roomId}`);
 
     ws.onopen = () => {
         console.log('连接成功');
