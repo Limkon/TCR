@@ -19,7 +19,7 @@ jobs:
           if [[ -z "$LATEST_TAG" ]]; then
             NEW_TAG="v1.0.0"
           else
-            # 拆分版本号：v1.0.3 -> 1 0 3
+            # 拆分版本号 v1.0.3 -> 1 0 3
             VERSION=${LATEST_TAG#v}
             IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
             PATCH=$((PATCH + 1))
@@ -29,7 +29,7 @@ jobs:
           echo "Latest tag: $LATEST_TAG"
           echo "Next tag: $NEW_TAG"
 
-      - name: Zip files (exclude .git, .github, dist)
+      - name: Zip files (excluding .git, .github, dist)
         run: |
           mkdir -p dist
           zip -r ./dist/source.zip . -x ".git/*" ".github/*" "dist/*"
