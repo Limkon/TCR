@@ -1,97 +1,127 @@
-const roomId = location.pathname.split('/')[1] || 'default';
-document.getElementById('roomTitle').innerText = `房间：${roomId}`;
 let ws;
-let username;
+let username = '';
 let joined = false;
-let currentUsers = [];
 
-function connectWebSocket(protocol) {
-  const host = location.hostname;
-  const port = location.port || (location.protocol === 'https:' ? '443' : '80');
-  const wsUrl = `${protocol}://${host}:${port}/${roomId}`;
-  ws = new WebSocket(wsUrl);
+// 连接 WebSocket
+function connect() {
+    const roomId = location.pathname.split('/')[1] || 'default';
+    ws = new WebSocket(`ws://${location.host}/${roomId}`);
 
-  ws.onopen = () => console.log('WebSocket 已连接');
-  ws.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data);
-      if (data.type === 'userList') {
-        updateUserList(data.users);
-      } else if (data.type === 'message') {
-        addMessage(data.username, data.message);
-      } else if (data.type === 'clearChat') {
-        clearChat(true);
-      } else if (data.type === 'error') {
-        alert(data.message);
-        joined = false;
-      }
-    } catch (error) {
-      console.error('消息解析错误:', error);
-    }
-  };
-  ws.onclose = () => { console.log('WebSocket 连接断开'); clearChat(false); };
-  ws.onerror = (err) => console.error('WebSocket 错误:', err);
+    ws.onopen = () => {
+        console.log('连接成功');
+    };
+
+    ws.onmessage = (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            switch (data.type) {
+                case 'userList':
+                    updateUserList(data.users);
+                    break;
+                case 'message':
+                    addMessage(data.username, data.message);
+                    break;
+                case 'joinError':
+                    alert('用户名已存在，请重新输入');
+                    joined = false;
+                    username = '';
+                    document.getElementById('username').value = '';
+                    break;
+                case 'clearChat':
+                    clearChatWithTip();
+                    break;
+                case 'clearChatBeforeDisconnect':
+                    clearChatWithTip();
+                    break;
+                default:
+                    console.warn('未知消息类型:', data);
+                    break;
+            }
+        } catch (error) {
+            console.error('消息解析失败:', error);
+        }
+    };
+
+    ws.onclose = () => {
+        console.log('连接关闭');
+    };
 }
 
-connectWebSocket(location.protocol === 'https:' ? 'wss' : 'ws');
-
-function joinChat() {
-  if (joined) { alert('您已经加入过了'); return; }
-  username = document.getElementById('username').value.trim();
-  if (!username) { alert('请输入用户名'); return; }
-  if (currentUsers.includes(username)) { alert('用户名已存在，请换一个'); return; }
-  if (ws.readyState === WebSocket.OPEN) {
+// 加入聊天
+document.getElementById('join').onclick = () => {
+    const input = document.getElementById('username');
+    const name = input.value.trim();
+    if (!name) {
+        alert('请输入用户名');
+        return;
+    }
+    if (joined) {
+        alert('已加入聊天室');
+        return;
+    }
+    username = name;
     ws.send(JSON.stringify({ type: 'join', username }));
     joined = true;
-  } else {
-    alert('服务器未连接');
-  }
+    document.getElementById('message').disabled = false;
+    document.getElementById('send').disabled = false;
+};
+
+// 发送消息
+document.getElementById('send').onclick = () => {
+    const input = document.getElementById('message');
+    const msg = input.value.trim();
+    if (!msg) return;
+    ws.send(JSON.stringify({ type: 'message', message: msg }));
+    input.value = '';
+};
+
+// 回车键快捷发送
+document.getElementById('message').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        document.getElementById('send').click();
+    }
+});
+
+// 主题切换
+document.getElementById('theme-toggle').onclick = () => {
+    document.body.classList.toggle('dark-mode');
+    document.body.classList.toggle('light-mode');
+};
+
+// 用户列表显示切换
+document.getElementById('userlist-toggle').onclick = () => {
+    document.getElementById('userlist').classList.toggle('hidden');
+};
+
+// 添加聊天消息
+function addMessage(user, message) {
+    const chat = document.getElementById('chat');
+    const div = document.createElement('div');
+    div.className = user === username ? 'message-right' : 'message-left';
+    div.textContent = `${user}: ${message}`;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
 }
 
-function sendMessage() {
-  const msgEl = document.getElementById('message');
-  const message = msgEl.value.trim();
-  if (message && username && ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify({ type: 'message', message }));
-    msgEl.value = '';
-  } else {
-    alert('请先加入聊天室');
-  }
-}
-
-function addMessage(sender, text) {
-  const chat = document.getElementById('chat');
-  const div = document.createElement('div');
-  div.className = sender === username ? 'message-right' : 'message-left';
-  div.innerHTML = `<div><b>${sender}</b>: ${text}</div>`;
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
-}
-
+// 更新在线用户列表
 function updateUserList(users) {
-  currentUsers = users;
-  const list = document.getElementById('userList');
-  list.innerHTML = '';
-  users.forEach(u => {
-    const li = document.createElement('li');
-    li.textContent = u;
-    list.appendChild(li);
-  });
+    const list = document.getElementById('userlist');
+    list.innerHTML = '<h3>在线用户</h3>';
+    users.forEach(user => {
+        const div = document.createElement('div');
+        div.textContent = user;
+        list.appendChild(div);
+    });
 }
 
-function clearChat(system) {
-  document.getElementById('chat').innerHTML = system ? '<div style="text-align:center;color:gray;">系统提示：聊天记录已清空</div>' : '';
-  document.getElementById('userList').innerHTML = '';
-  joined = false;
+// 清空聊天并提示
+function clearChatWithTip() {
+    const chat = document.getElementById('chat');
+    chat.innerHTML = '';
+    const tip = document.createElement('div');
+    tip.className = 'message-left';
+    tip.textContent = '系统提示：聊天记录已清空';
+    chat.appendChild(tip);
 }
 
-document.getElementById('join-btn').addEventListener('click', joinChat);
-document.getElementById('send-btn').addEventListener('click', sendMessage);
-document.getElementById('dark-mode-toggle').addEventListener('click', () => document.body.classList.toggle('dark-mode'));
-document.getElementById('toggle-users').addEventListener('click', () => document.getElementById('left').classList.toggle('hidden'));
-document.getElementById('message').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
-
-// 每10分钟清屏
-setInterval(() => {
-  document.getElementById('chat').innerHTML = '<div style="text-align:center;color:gray;">系统提示：聊天记录已清空</div>';
-}, 600000);
+connect();
