@@ -131,3 +131,38 @@ body.dark-mode .message-right {
     background: #4a704a; /* 更深的绿色背景，提高对比度 */
     color: #f0f0f0; /* 浅灰色文字，清晰可读 */
 }
+
+/* 移动端适配 */
+@media (max-width: 600px) {
+    footer {
+        flex-wrap: wrap; /* 允许换行 */
+        gap: 8px; /* 元素间距 */
+    }
+
+    footer label {
+        width: 100%; /* 标签独占一行 */
+        margin-right: 0;
+        text-align: left;
+    }
+
+    footer #username {
+        width: 100%; /* 用户名输入框占满一行 */
+        max-width: 200px; /* 限制最大宽度 */
+    }
+
+    footer #message {
+        width: 100%; /* 消息输入框占满一行 */
+        flex: none; /* 移除 flex: 1，避免拉伸 */
+    }
+
+    footer button {
+        padding: 8px 12px; /* 缩小按钮 */
+        width: auto; /* 按钮自适应内容 */
+    }
+
+    footer #join,
+    footer #send {
+        flex: 1; /* 按钮均分剩余空间 */
+        min-width: 80px; /* 确保按钮有最小宽度 */
+    }
+}
