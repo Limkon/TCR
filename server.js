@@ -70,7 +70,7 @@ wss.on('connection', (ws, req) => {
             console.log(`用户 ${ws.username} 离开，更新用户列表: ${room.users}`);
             // 清理聊天记录
             room.messages = [];
-            broadcast(ws.roomId, { type: 'clearChatBeforeDisconnect', message: `已清理房间 ${ws.roomId} 的聊天记录` });
+            broadcast(ws.roomId, { type: 'clearChatBeforeDisconnect', message: `用户 ${ws.username} 离开，已清理房间 ${ws.roomId} 的聊天记录` });
             // 广播更新后的用户列表
             broadcast(ws.roomId, { type: 'userList', users: room.users });
             // 如果房间空了，销毁房间
@@ -85,11 +85,15 @@ wss.on('connection', (ws, req) => {
 
 function broadcast(roomId, data) {
     console.log(`广播至房间 ${roomId}:`, data);
-    wss.clients.forEach(client => {
-        if (client.roomId === roomId && client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify(data));
-        }
-    });
+    if (data && typeof data === 'object') {
+        wss.clients.forEach(client => {
+            if (client.roomId === roomId && client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify(data));
+            }
+        });
+    } else {
+        console.error(`无效广播数据: ${data}`);
+    }
 }
 
 function clearChat(roomId) {
