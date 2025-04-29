@@ -6,12 +6,15 @@ echo "开始安装 TCR 聊天室项目..."
 # 获取当前目录
 PROJECT_DIR=$(pwd)
 
-# 拉取 TCR 项目到临时目录并覆盖本地文件
+# 拉取 TCR 项目到当前目录（覆盖同名文件）
 echo "拉取 TCR 项目到当前目录（覆盖同名文件）..."
 TEMP_DIR=$(mktemp -d)
 
 # 下载 master 分支压缩包
 curl -L https://github.com/Limkon/TCR/archive/refs/heads/master.tar.gz | tar -xz -C "$TEMP_DIR" --strip-components=1
+
+# 删除 .github 目录
+rm -rf "$TEMP_DIR/.github"
 
 # 强制覆盖本地文件
 cp -rf "$TEMP_DIR"/. "$PROJECT_DIR"
