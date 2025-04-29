@@ -32,7 +32,7 @@ jobs:
       - name: Zip files (excluding .git, .github, dist)
         run: |
           mkdir -p dist
-          zip -r ./dist/source.zip . -x ".git/*" ".github/*" "dist/*"
+          zip -r ./dist/source.zip . -x ".git/**" ".github/**" "dist/**"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
