@@ -1,4 +1,4 @@
-name: Manual Release
+name: Manual Auto Release
 
 on:
   workflow_dispatch:  # 手动触发
@@ -11,24 +11,34 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up variables
-        id: vars
+      - name: Get latest release tag
+        id: get_latest_tag
         run: |
-          TAG_NAME="release-$(date +'%Y%m%d-%H%M%S')"
-          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
-          echo "Release tag: $TAG_NAME"
+          # 获取最新 tag（如果没有就从 v1.0.0 开始）
+          LATEST_TAG=$(git tag --sort=-v:refname | head -n 1)
+          if [[ -z "$LATEST_TAG" ]]; then
+            NEW_TAG="v1.0.0"
+          else
+            # 拆分版本号：v1.0.3 -> 1 0 3
+            VERSION=${LATEST_TAG#v}
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+            PATCH=$((PATCH + 1))
+            NEW_TAG="v$MAJOR.$MINOR.$PATCH"
+          fi
+          echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
+          echo "Latest tag: $LATEST_TAG"
+          echo "Next tag: $NEW_TAG"
 
-      - name: Zip files excluding .github directory
+      - name: Zip files (exclude .git, .github, dist)
         run: |
           mkdir -p dist
-          zip -r ./dist/source.zip . -x ".github/*"
+          zip -r ./dist/source.zip . -x ".git/*" ".github/*" "dist/*"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ env.TAG_NAME }}
-          name: ${{ env.TAG_NAME }}
+          tag_name: ${{ env.NEW_TAG }}
+          name: ${{ env.NEW_TAG }}
           files: ./dist/source.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
