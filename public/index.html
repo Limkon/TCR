@@ -7,23 +7,31 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <aside class="sidebar">
-    <h2 id="roomTitle">房间：default</h2>
-    <div class="user-section">
-      <input type="text" id="username" placeholder="输入用户名" />
-      <button id="join-btn">加入聊天室</button>
-      <button id="toggle-users">隐藏用户列表</button>
-    </div>
-    <ul id="userList"></ul>
-  </aside>
+  <div class="container">
+    <aside class="sidebar">
+      <h2>聊天室</h2>
+      <div class="user-section">
+        <input type="text" id="username" placeholder="输入用户名" />
+        <button id="joinBtn">加入聊天室</button>
+        <button id="hideUsersBtn">隐藏用户列表</button>
+      </div>
+      <div class="room-section">
+        <input type="text" id="roomId" placeholder="房间号 (可选)" />
+      </div>
+      <div id="usersListContainer">
+        <h3>在线用户</h3>
+        <ul id="users"></ul>
+      </div>
+    </aside>
 
-  <main class="chat">
-    <div id="chatArea"></div>
-    <div class="input-section">
-      <input type="text" id="messageInput" placeholder="输入消息..." />
-      <button id="send-btn">发送</button>
-    </div>
-  </main>
+    <main class="chat">
+      <div id="chatArea"></div>
+      <div class="input-section">
+        <input type="text" id="messageInput" placeholder="输入消息..." />
+        <button id="sendBtn">发送</button>
+      </div>
+    </main>
+  </div>
 
   <script src="script.js"></script>
 </body>
