@@ -22,7 +22,7 @@ function connect() {
                     addMessage(data.username, data.message);
                     break;
                 case 'joinError':
-                    alert('用户名已存在，请重新输入');
+                    alert(data.message || '用户名已存在，请重新输入');
                     joined = false;
                     username = '';
                     document.getElementById('username').value = '';
@@ -30,6 +30,9 @@ function connect() {
                     document.getElementById('username-label').style.display = 'block';
                     document.getElementById('username').style.display = 'block';
                     document.getElementById('join').style.display = 'block';
+                    // 禁用消息输入框和发送按钮
+                    document.getElementById('message').disabled = true;
+                    document.getElementById('send').disabled = true;
                     break;
                 case 'clearChat':
                     clearChatWithTip(roomId);
@@ -76,10 +79,7 @@ document.getElementById('join').onclick = () => {
     }
     username = name;
     ws.send(JSON.stringify({ type: 'join', username }));
-    joined = true;
-    document.getElementById('message').disabled = false;
-    document.getElementById('send').disabled = false;
-    // 隐藏用户名输入框、标签和加入按钮
+    // 临时隐藏用户名输入框、标签和加入按钮，等待服务器确认
     document.getElementById('username-label').style.display = 'none';
     document.getElementById('username').style.display = 'none';
     document.getElementById('join').style.display = 'none';
