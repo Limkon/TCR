@@ -29,7 +29,7 @@ wss.on('connection', (ws, req) => {
     const room = chatRooms[roomId];
 
     ws.on('message', (message) => {
-        // 禁用明文消息日志，仅记录事件
+        // 仅记录消息事件，不记录内容
         console.log(`收到消息事件: 房间 ${roomId}`);
         try {
             const data = JSON.parse(message);
@@ -52,13 +52,13 @@ wss.on('connection', (ws, req) => {
                     ws.send(JSON.stringify({ type: 'joinSuccess', message: '加入成功' }));
                 }
             } else if (data.type === 'message') {
-                // 存储并广播消息，不记录消息内容
+                // 存储并广播消息，不记录内容
                 room.messages.push({ username: ws.username, message: data.message });
                 console.log(`来自 ${ws.username} 在房间 ${roomId} 的消息事件`);
                 broadcast(roomId, { type: 'message', username: ws.username, message: data.message });
             }
         } catch (error) {
-            console.error('消息解析错误:', error);
+            console.error('消息解析错误:', error.message);
         }
     });
 
@@ -85,6 +85,7 @@ wss.on('connection', (ws, req) => {
 });
 
 function broadcast(roomId, data) {
+    // 仅记录广播事件和消息类型
     console.log(`广播至房间 ${roomId}: 类型 ${data.type}`);
     if (data && typeof data === 'object') {
         wss.clients.forEach(client => {
@@ -93,7 +94,7 @@ function broadcast(roomId, data) {
             }
         });
     } else {
-        console.error(`无效广播数据: ${data}`);
+        console.error('无效广播数据');
     }
 }
 
