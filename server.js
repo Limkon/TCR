@@ -23,7 +23,7 @@ wss.on('connection', (ws, req) => {
         chatRooms[roomId] = {
             users: [],
             messages: [],
-            timer: setInterval(() => clearChat(roomId), 600000) // 每10分钟清理一次
+            timer: setInterval(() => clearChat(roomId), 600000) // 每10分钟清理聊天记录
         };
     }
     const room = chatRooms[roomId];
@@ -68,9 +68,10 @@ wss.on('connection', (ws, req) => {
             const room = chatRooms[ws.roomId];
             room.users = room.users.filter(user => user !== ws.username && user !== null);
             console.log(`用户 ${ws.username} 离开，更新用户列表: ${room.users}`);
-            // 广播清理聊天记录和用户列表
+            // 清理聊天记录
             room.messages = [];
             broadcast(ws.roomId, { type: 'clearChatBeforeDisconnect', message: `已清理房间 ${ws.roomId} 的聊天记录` });
+            // 广播更新后的用户列表
             broadcast(ws.roomId, { type: 'userList', users: room.users });
             // 如果房间空了，销毁房间
             if (room.users.length === 0) {
@@ -94,8 +95,9 @@ function broadcast(roomId, data) {
 function clearChat(roomId) {
     const room = chatRooms[roomId];
     if (room) {
+        // 仅清理聊天记录，不影响用户列表
         room.messages = [];
-        console.log(`已清理房间 ${roomId} 的聊天记录`);
+        console.log(`定时清理房间 ${roomId} 的聊天记录，用户列表保持: ${room.users}`);
         broadcast(roomId, { type: 'clearChat', message: `已清理房间 ${roomId} 的聊天记录` });
     }
 }
