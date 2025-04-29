@@ -1,35 +1,127 @@
-/* 简化版 style.css */ 
-:root {
-  --bg-color: #f0f2f5;
-  --left-bg: #fff;
-  --left-border: #ddd;
-  --chat-bg: #fff;
-  --input-bg: #fff;
-  --input-border: #ccc;
-  --message-right-color: #007bff;
-  --button-bg: #007bff;
-  --button-hover-bg: #0056b3;
+let ws;
+let username = '';
+let joined = false;
+
+// 连接 WebSocket
+function connect() {
+    const roomId = location.pathname.split('/')[1] || 'default';
+    ws = new WebSocket(`ws://${location.host}/${roomId}`);
+
+    ws.onopen = () => {
+        console.log('连接成功');
+    };
+
+    ws.onmessage = (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            switch (data.type) {
+                case 'userList':
+                    updateUserList(data.users);
+                    break;
+                case 'message':
+                    addMessage(data.username, data.message);
+                    break;
+                case 'joinError':
+                    alert('用户名已存在，请重新输入');
+                    joined = false;
+                    username = '';
+                    document.getElementById('username').value = '';
+                    break;
+                case 'clearChat':
+                    clearChatWithTip();
+                    break;
+                case 'clearChatBeforeDisconnect':
+                    clearChatWithTip();
+                    break;
+                default:
+                    console.warn('未知消息类型:', data);
+                    break;
+            }
+        } catch (error) {
+            console.error('消息解析失败:', error);
+        }
+    };
+
+    ws.onclose = () => {
+        console.log('连接关闭');
+    };
 }
-.dark-mode {
-  --bg-color: #1e1e1e;
-  --left-bg: #2c2c2c;
-  --left-border: #444;
-  --chat-bg: #1e1e1e;
-  --input-bg: #2c2c2c;
-  --input-border: #555;
-  --message-right-color: #007bff;
-  --button-bg: #555;
-  --button-hover-bg: #777;
+
+// 加入聊天
+document.getElementById('join').onclick = () => {
+    const input = document.getElementById('username');
+    const name = input.value.trim();
+    if (!name) {
+        alert('请输入用户名');
+        return;
+    }
+    if (joined) {
+        alert('已加入聊天室');
+        return;
+    }
+    username = name;
+    ws.send(JSON.stringify({ type: 'join', username }));
+    joined = true;
+    document.getElementById('message').disabled = false;
+    document.getElementById('send').disabled = false;
+};
+
+// 发送消息
+document.getElementById('send').onclick = () => {
+    const input = document.getElementById('message');
+    const msg = input.value.trim();
+    if (!msg) return;
+    ws.send(JSON.stringify({ type: 'message', message: msg }));
+    input.value = '';
+};
+
+// 回车键快捷发送
+document.getElementById('message').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        document.getElementById('send').click();
+    }
+});
+
+// 主题切换
+document.getElementById('theme-toggle').onclick = () => {
+    document.body.classList.toggle('dark-mode');
+    document.body.classList.toggle('light-mode');
+};
+
+// 用户列表显示切换
+document.getElementById('userlist-toggle').onclick = () => {
+    document.getElementById('userlist').classList.toggle('hidden');
+};
+
+// 添加聊天消息
+function addMessage(user, message) {
+    const chat = document.getElementById('chat');
+    const div = document.createElement('div');
+    div.className = user === username ? 'message-right' : 'message-left';
+    div.textContent = `${user}: ${message}`;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
 }
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html, body { height: 100%; width: 100%; font-family: sans-serif; background: var(--bg-color); }
-body { display: flex; }
-#left { width: 250px; background: var(--left-bg); padding: 20px; border-right: 1px solid var(--left-border); overflow-y: auto; }
-#right { flex: 1; display: flex; flex-direction: column; }
-#chat { flex: 1; padding: 15px; overflow-y: auto; }
-#input-area { padding: 10px; border-top: 1px solid var(--left-border); display: flex; }
-#message { flex: 1; padding: 10px; border: 1px solid var(--input-border); border-radius: 5px; }
-button { margin-left: 10px; padding: 10px; background: var(--button-bg); color: white; border: none; border-radius: 5px; cursor: pointer; }
-button:hover { background: var(--button-hover-bg); }
-.message-left, .message-right { margin: 5px 0; }
-.message-right { color: var(--message-right-color); text-align: right; }
+
+// 更新在线用户列表
+function updateUserList(users) {
+    const list = document.getElementById('userlist');
+    list.innerHTML = '<h3>在线用户</h3>';
+    users.forEach(user => {
+        const div = document.createElement('div');
+        div.textContent = user;
+        list.appendChild(div);
+    });
+}
+
+// 清空聊天并提示
+function clearChatWithTip() {
+    const chat = document.getElementById('chat');
+    chat.innerHTML = '';
+    const tip = document.createElement('div');
+    tip.className = 'message-left';
+    tip.textContent = '系统提示：聊天记录已清空';
+    chat.appendChild(tip);
+}
+
+connect();
