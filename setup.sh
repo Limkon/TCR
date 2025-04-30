@@ -8,7 +8,8 @@ PROJECT_DIR=$(pwd)
 echo "📁 项目目录: $PROJECT_DIR"
 
 # 自动从调用 curl 命令中推导下载地址（通过 /proc/self）
-if [ -z "$SCRIPT_URL" ]; then
+SCRIPT_URL="${BASH_SOURCE[0]}"
+if [[ -z "$SCRIPT_URL" || ! "$SCRIPT_URL" =~ ^https://raw\.githubusercontent\.com/ ]]; then
   SCRIPT_URL=$(grep -ao 'https://raw.githubusercontent.com[^ ]*setup.sh' /proc/$$/cmdline | head -n 1)
 fi
 
