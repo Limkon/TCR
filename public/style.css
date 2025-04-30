@@ -202,3 +202,28 @@ body.dark-mode .message-right {
         border-top: 1px solid #ccc;
     }
 }
+
+/* 销毁房间按钮 */
+.controls .destroy-room {
+    margin-left: 10px;
+    padding: 6px 12px;
+    background: #fff;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.controls .destroy-room:hover {
+    background: #f0f0f0;
+}
+
+body.dark-mode .controls .destroy-room {
+    background: #444;
+    color: #e0e0e0;
+    border-color: #555;
+}
+
+body.dark-mode .controls .destroy-room:hover {
+    background: #555;
+}
