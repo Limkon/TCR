@@ -9,17 +9,21 @@ PROJECT_DIR=$(pwd)
 echo "📁 项目目录: $PROJECT_DIR"
 
 # --- 自动获取 GitHub tar.gz 地址 ---
-RAW_URL=$(grep 'url =' .git/config | awk '{print $3}')
+RAW_URL=$(git config --get remote.origin.url)  # 从 git 配置中获取 URL
 
 if [[ "$RAW_URL" == git@* ]]; then
+  # 如果是 SSH 地址，转换为 HTTPS 地址
   GIT_URL="https://github.com/$(echo "$RAW_URL" | sed 's/git@github.com:\(.*\)\.git/\1/')"
 else
+  # 如果是 HTTPS 地址，直接使用
   GIT_URL="${RAW_URL%.git}"
 fi
 
-BRANCH=$(grep -A1 "\[branch" .git/config | grep merge | head -n1 | sed 's/.*\///')
-[ -z "$BRANCH" ] && BRANCH="master"
+# 获取当前分支名
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+[ -z "$BRANCH" ] && BRANCH="master"  # 如果没有分支，默认为 master
 
+# 拼接 tar.gz 下载链接
 TAR_URL="$GIT_URL/archive/refs/heads/$BRANCH.tar.gz"
 echo "🌐 下载地址: $TAR_URL"
 
