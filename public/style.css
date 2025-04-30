@@ -1,3 +1,4 @@
+/* 基础布局 */
 body {
     margin: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -6,46 +7,7 @@ body {
 #app {
     display: flex;
     flex-direction: column;
-    height: 100vh; /* 占满视口高度 */
-}
-
-#entry {
-    text-align: center;
-    padding: 50px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-#entry h2 {
-    margin-bottom: 20px;
-}
-
-#entry form {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-#entry input[type="password"] {
-    padding: 8px;
-    width: 200px;
-    margin-right: 10px;
-}
-
-#entry button {
-    padding: 8px 16px;
-}
-
-#room-id-display {
-    margin-top: 10px;
-}
-
-#chat-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh; /* 确保聊天容器占满视口 */
+    height: 100vh;
 }
 
 header {
@@ -55,7 +17,6 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    min-height: 60px; /* 固定 header 高度 */
 }
 
 header h1 {
@@ -64,10 +25,20 @@ header h1 {
 
 .controls button {
     margin-left: 10px;
+    padding: 6px 12px;
+    background: #fff;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.controls button:hover {
+    background: #f0f0f0;
 }
 
 main {
-    flex: 1; /* 填充剩余空间 */
+    flex: 1;
     display: flex;
     overflow: hidden;
 }
@@ -96,7 +67,6 @@ footer {
     padding: 10px;
     background: #eee;
     align-items: center;
-    min-height: 60px; /* 固定 footer 高度 */
 }
 
 footer label {
@@ -114,13 +84,14 @@ footer #username {
 }
 
 footer #message {
-    flex: 1; /* 消息输入框占据剩余空间 */
+    flex: 1; /* 消息输入框占据剩余空间，相对延长 */
 }
 
 footer button {
     padding: 8px 16px;
 }
 
+/* 消息气泡 */
 .message-left {
     background: #e0f7fa;
     color: #333;
@@ -139,17 +110,24 @@ footer button {
     text-align: right;
 }
 
+/* 深色模式 */
 body.dark-mode {
     background: #121212;
     color: #e0e0e0;
 }
 
-body.dark-mode #entry {
-    background: #1e1e1e;
-}
-
 body.dark-mode header {
     background: #333;
+}
+
+body.dark-mode .controls button {
+    background: #444;
+    color: #e0e0e0;
+    border-color: #555;
+}
+
+body.dark-mode .controls button:hover {
+    background: #555;
 }
 
 body.dark-mode #chat {
@@ -174,6 +152,7 @@ body.dark-mode .message-right {
     color: #f0f0f0;
 }
 
+/* 移动端适配 */
 @media (max-width: 600px) {
     footer {
         flex-wrap: wrap;
@@ -207,29 +186,18 @@ body.dark-mode .message-right {
         min-width: 80px;
     }
 
-    #entry form {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    #entry input[type="password"] {
-        margin-right: 0;
-        width: 100%;
-        max-width: 200px;
-    }
-
     main {
         flex-direction: column;
     }
 
     #chat {
         flex: none;
-        height: 50%; /* 均分 main 空间 */
+        height: 50%;
     }
 
     #userlist {
         flex: none;
-        height: 50%; /* 均分 main 空间 */
+        height: 50%;
         border-left: none;
         border-top: 1px solid #ccc;
     }
