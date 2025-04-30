@@ -7,24 +7,19 @@ echo "🚀 开始安装项目..."
 PROJECT_DIR=$(pwd)
 echo "📁 项目目录: $PROJECT_DIR"
 
-# 自动从调用 curl 命令中推导下载地址（通过 /proc/self）
-SCRIPT_URL="${BASH_SOURCE[0]}"
-if [[ -z "$SCRIPT_URL" || ! "$SCRIPT_URL" =~ ^https://raw\.githubusercontent\.com/ ]]; then
-  SCRIPT_URL=$(grep -ao 'https://raw.githubusercontent.com[^ ]*setup.sh' /proc/$$/cmdline | head -n 1)
-fi
-
-if [[ -z "$SCRIPT_URL" || ! "$SCRIPT_URL" =~ ^https://raw\.githubusercontent\.com/ ]]; then
-  echo "❌ 无法自动获取 setup.sh 的原始地址，请确保是通过 curl -fsSL https://raw.githubusercontent.com/.../setup.sh 执行的。"
+# 自动推导 GitHub 原始脚本 URL
+SCRIPT_URL="$1"
+if [[ -z "$SCRIPT_URL" ]]; then
+  echo "❌ 错误：请通过参数传入 setup.sh 的 GitHub 原始地址（raw.githubusercontent.com/...）"
   exit 1
 fi
-
-echo "🌐 脚本地址: $SCRIPT_URL"
 
 # 提取 GitHub 用户名、仓库名、分支
 GITHUB_USER=$(echo "$SCRIPT_URL" | cut -d'/' -f4)
 REPO_NAME=$(echo "$SCRIPT_URL" | cut -d'/' -f5)
 BRANCH=$(echo "$SCRIPT_URL" | cut -d'/' -f6)
 
+# 根据 GitHub 信息构造下载地址
 TAR_URL="https://github.com/$GITHUB_USER/$REPO_NAME/archive/refs/heads/$BRANCH.tar.gz"
 echo "📦 下载链接: $TAR_URL"
 
