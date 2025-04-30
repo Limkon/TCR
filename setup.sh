@@ -1,38 +1,12 @@
 #!/bin/bash
 set -e
 
-echo "🚀 开始安装项目..."
+echo "🚀 开始安装 TCR 项目..."
 
-# 获取当前目录
-PROJECT_DIR=$(pwd)
-echo "📁 项目目录: $PROJECT_DIR"
-
-# 检查是否传入 SCRIPT_URL
-SCRIPT_URL="$1"
-if [[ -z "$SCRIPT_URL" ]]; then
-    echo "❌ 错误：请通过参数传入 setup.sh 的 GitHub 原始地址（raw.githubusercontent.com/...）"
-    exit 1
-fi
-
-# 验证 SCRIPT_URL 是否为 GitHub raw URL
-if [[ ! "$SCRIPT_URL" =~ ^https://raw.githubusercontent.com/[^/]+/[^/]+/ ]]; then
-    echo "❌ 错误：SCRIPT_URL 格式不正确，必须是 GitHub raw URL（例如 https://raw.githubusercontent.com/USER/REPO/BRANCH/setup.sh）"
-    exit 1
-fi
-
-# 提取 GitHub 用户名、仓库名、分支
-# 使用字符串操作提取
-TEMP_URL="${SCRIPT_URL#https://raw.githubusercontent.com/}"
-IFS='/' read -r -a PARTS <<< "$TEMP_URL"
-GITHUB_USER="${PARTS[0]}"
-REPO_NAME="${PARTS[1]}"
-
-# 拼接分支路径，跳过最后一个元素（setup.sh）
-BRANCH_PATH=""
-for i in $(seq 2 $(( ${#PARTS[@]} - 2 )) ); do
-    BRANCH_PATH="${BRANCH_PATH}/${PARTS[$i]}"
-done
-BRANCH="${BRANCH_PATH#/}" # 移除开头的斜杠
+# 直接定义 GitHub 仓库信息
+GITHUB_USER="Limkon"
+REPO_NAME="TCR"
+BRANCH="master"
 
 echo "👤 GitHub 用户名: $GITHUB_USER"
 echo "📦 仓库名: $REPO_NAME"
@@ -44,9 +18,13 @@ echo "📦 下载链接: $TAR_URL"
 
 # 验证 TAR_URL 是否有效
 if ! curl -fsSL --head "$TAR_URL" >/dev/null 2>&1; then
-    echo "❌ 错误：无法访问 $TAR_URL，可能是仓库、分支不存在或网络问题"
+    echo "❌ 错误：无法访问 $TAR_URL，可能是网络问题"
     exit 1
 fi
+
+# 获取当前目录
+PROJECT_DIR=$(pwd)
+echo "📁 项目目录: $PROJECT_DIR"
 
 # 创建临时目录并解压项目文件
 TEMP_DIR=$(mktemp -d)
@@ -104,4 +82,4 @@ Name=Chatroom Server
 Comment=Start Server automatically
 EOF
 
-echo "✅ 安装完成！系统重启后将自动启动服务器。"
+echo "✅ TCR 项目安装完成！系统重启后将自动启动服务器。"
