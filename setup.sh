@@ -55,7 +55,7 @@ mkdir -p "$HOME/.config/autostart"
 cat > "$HOME/.config/autostart/tcr-startup.desktop" <<EOF
 [Desktop Entry]
 Type=Application
-Exec=bash -c "cd '$PROJECT_DIR' && source '$PROJECT_DIR/.nvm/nvm.sh' && node server.js >> server.log 2>&1"
+Exec=bash -c "cd '$PROJECT_DIR' && source '$PROJECT_DIR/.nvm/nvm.sh' && node server.js"
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true
@@ -65,6 +65,6 @@ EOF
 
 # --- 启动服务 ---
 echo "🟢 正在启动服务..."
-nohup bash -c "cd '$PROJECT_DIR' && source '$PROJECT_DIR/.nvm/nvm.sh' && node server.js" > "$PROJECT_DIR/server.log" 2>&1 &
+nohup bash -c "cd '$PROJECT_DIR' && source '$PROJECT_DIR/.nvm/nvm.sh' && node server.js" &
 
-echo -e "\e[1;32m✅ 安装完成！服务已启动，日志记录在 server.log。\e[0m"
+echo -e "\e[1;32m✅ 安装完成！服务已启动。\e[0m"
