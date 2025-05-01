@@ -82,4 +82,4 @@ Name=Chatroom Server
 Comment=Start Server automatically
 EOF
 
-echo "✅ TCR 项目安装完成！系统重启后将自动启动服务器。"
+echo "✅ 项目安装完成！系统重启后将自动启动服务器。"
