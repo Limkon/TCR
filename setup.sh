@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "🚀 开始安装 TCR 项目..."
+echo "🚀 开始安装项目..."
 
 # 直接定义 GitHub 仓库信息
 GITHUB_USER="Limkon"
@@ -35,13 +35,19 @@ if ! curl -fsSL "$TAR_URL" | tar -xz -C "$TEMP_DIR" --strip-components=1; then
     exit 1
 fi
 
-# 删除不需要的 .github 目录并复制文件
+# 删除 .github 目录（如果存在）
 rm -rf "$TEMP_DIR/.github"
-if ! cp -rf "$TEMP_DIR"/. "$PROJECT_DIR"; then
+
+# 复制文件到项目目录，排除所有以.开头的文件和目录
+shopt -s extglob dotglob
+cd "$TEMP_DIR"
+if ! cp -rf !(.*) "$PROJECT_DIR"; then
     echo "❌ 错误：复制文件到 $PROJECT_DIR 失败"
     rm -rf "$TEMP_DIR"
+    shopt -u extglob dotglob
     exit 1
 fi
+shopt -u extglob dotglob
 rm -rf "$TEMP_DIR"
 
 # 检查 Node.js 是否安装
