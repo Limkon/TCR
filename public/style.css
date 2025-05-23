@@ -1,4 +1,4 @@
-/* 基础布局 */
+/* 基礎佈局 */
 body {
     margin: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -57,7 +57,7 @@ main {
 
 #userlist {
     flex: 1;
-    min-width: 180px; /* 用户列表最小宽度 */
+    min-width: 180px; /* 使用者列表最小寬度 */
     padding: 15px;
     border-left: 1px solid #ccc;
     overflow-y: auto;
@@ -84,11 +84,11 @@ footer {
     background: #eee;
     align-items: center;
     border-top: 1px solid #ddd;
-    gap: 10px; /* 页脚项目之间的间距 */
+    gap: 10px; /* 頁腳項目之間的間距 */
 }
 
 footer label {
-    margin-right: 5px; /* 减小边距 */
+    margin-right: 5px; /* 減小邊距 */
     font-size: 14px;
     white-space: nowrap;
 }
@@ -104,11 +104,11 @@ footer #username {
 }
 
 footer #message {
-    flex: 1; /* 消息输入框占据剩余空间 */
+    flex: 1; /* 訊息輸入框佔據剩餘空間 */
 }
 
 footer button {
-    padding: 8px 12px; /* 统一内边距 */
+    padding: 8px 12px; /* 統一內邊距 */
     border: 1px solid #007bff;
     background-color: #007bff;
     color: white;
@@ -134,52 +134,52 @@ footer #image-button:hover:not(:disabled) {
 }
 
 
-/* 消息气泡 */
+/* 訊息氣泡 */
 .message-left, .message-right {
     padding: 10px 15px;
-    margin: 15px 0; /* 增加垂直间距以容纳尾巴 */
+    margin: 15px 0; /* 增加垂直間距以容納尾巴 */
     border-radius: 12px;
     max-width: 75%;
-    word-wrap: break-word; /* 确保长单词换行 */
+    word-wrap: break-word; /* 確保長單詞換行 */
     line-height: 1.4;
-    position: relative; /* 为伪元素定位 */
+    position: relative; /* 為偽元素定位 */
 }
 
 .message-left {
-    background: #e0f7fa; /* 接收消息的浅蓝色 */
+    background: #e0f7fa; /* 接收訊息的淺藍色 */
     color: #333;
     text-align: left;
-    margin-right: auto; /* 推到左边 */
-    border-bottom-left-radius: 12px; /* 调整圆角以匹配尾巴 */
+    margin-right: auto; /* 推到左邊 */
+    border-bottom-left-radius: 12px; /* 調整圓角以匹配尾巴 */
 }
 
 .message-right {
-    background: #c8e6c9; /* 发送消息的浅绿色 */
+    background: #c8e6c9; /* 發送訊息的淺綠色 */
     color: #333;
-    text-align: left; /* 气泡内的文本仍然左对齐，但气泡在右边 */
-    margin-left: auto; /* 推到右边 */
-    border-bottom-right-radius: 12px; /* 调整圆角以匹配尾巴 */
+    text-align: left; /* 氣泡內的文本仍然左對齊，但氣泡在右邊 */
+    margin-left: auto; /* 推到右邊 */
+    border-bottom-right-radius: 12px; /* 調整圓角以匹配尾巴 */
 }
 
-/* 语音气泡尾巴 */
+/* 語音氣泡尾巴 */
 .message-left::after {
     content: '';
     position: absolute;
-    bottom: 0px; /* 调整以使其与气泡底部对齐 */
-    left: -10px; /* 尾巴在气泡外部 */
+    bottom: 0px; /* 調整以使其與氣泡底部對齊 */
+    left: -10px; /* 尾巴在氣泡外部 */
     width: 0;
     height: 0;
     border: 12px solid transparent; /* 增加尾巴大小 */
-    border-right-color: #e0f7fa; /* 匹配气泡颜色 */
+    border-right-color: #e0f7fa; /* 匹配氣泡顏色 */
     border-left: 0;
-    border-bottom: 0; /* 调整边框以形成朝左的尾巴 */
+    border-bottom: 0; /* 調整邊框以形成朝左的尾巴 */
     margin-top: -6px; /* 垂直居中尾巴 */
 }
 
 .message-right::after {
     content: '';
     position: absolute;
-    bottom: 0px; /* 调整以使其与气泡底部对齐 */
+    bottom: 0px; /* 調整以使其与气泡底部对齐 */
     right: -10px; /* 尾巴在气泡外部 */
     width: 0;
     height: 0;
@@ -203,12 +203,13 @@ footer #image-button:hover:not(:disabled) {
 
 
 .chat-image {
-    max-width: 100%; /* 相对于消息气泡宽度 */
-    max-height: 250px;
+    max-width: 80%; /* 相对于消息气泡宽度，减小以避免过宽 */
+    max-height: 200px; /* 减小最大高度 */
     border-radius: 8px;
     margin-top: 5px;
     display: block; /* 确保它遵守边距 */
     cursor: pointer; /* 可选：以后用于灯箱效果 */
+    object-fit: contain; /* 确保图片在调整大小时保持其纵横比并且不会被裁剪 */
 }
 
 .system-message {
