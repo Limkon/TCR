@@ -1,19 +1,17 @@
 {
-    "name": "chat-app",
-    "version": "1.0.0",
-    "description": "A simple chat application with WebSocket",
-    "main": "server.js",
-    "scripts": {
-        "start": "node server.js"
-    },
-    "dependencies": {
-        "express": "^4.18.2",
-        "ws": "^8.11.0"
-    },
-    "devDependencies": {},
-    "engines": {
-        "node": ">=14.0.0"
-    },
-    "author": "",
-    "license": "ISC"
-}
+  "name": "chat-app",
+  "version": "1.0.0",
+  "description": "A simple chat application with WebSocket",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.11.0",
+    "axios": "^1.6.8"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  },
