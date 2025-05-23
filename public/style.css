@@ -148,7 +148,7 @@ footer #image-button:hover:not(:disabled) {
 .message-left {
     background: #e0f7fa; /* 接收訊息的淺藍色 */
     color: #333;
-    text-align: left;
+    text-align: left; /* 其他用戶的內容靠左對齊 */
     margin-right: auto; /* 推到左邊 */
     border-bottom-left-radius: 12px; /* 調整圓角以匹配尾巴 */
 }
@@ -156,7 +156,7 @@ footer #image-button:hover:not(:disabled) {
 .message-right {
     background: #c8e6c9; /* 發送訊息的淺綠色 */
     color: #333;
-    text-align: left; /* 氣泡內的文本仍然左對齊，但氣泡在右邊 */
+    text-align: right; /* 自身用戶的內容靠右對齊 */
     margin-left: auto; /* 推到右邊 */
     border-bottom-right-radius: 12px; /* 調整圓角以匹配尾巴 */
 }
@@ -212,6 +212,19 @@ footer #image-button:hover:not(:disabled) {
     cursor: pointer; /* 可选：以后用于灯箱效果 */
     object-fit: contain; /* 确保图片在调整大小时保持其纵横比并且不会被裁剪 */
 }
+
+/* 自身用戶發送的圖片靠右對齊 */
+.message-right .chat-image {
+    margin-left: auto;
+    margin-right: 0; /* 或者省略 margin-right: 0 也可以 */
+}
+
+/* 其他用戶發送的圖片（默認靠左，如果需要明確可以添加） */
+.message-left .chat-image {
+    margin-right: auto;
+    margin-left: 0; /* 或者省略 margin-left: 0 也可以 */
+}
+
 
 .system-message {
     font-style: italic;
@@ -281,10 +294,12 @@ body.dark-mode footer #image-button:hover:not(:disabled) {
 body.dark-mode .message-left {
     background: #2c3e50; /* 深色蓝灰色 */
     color: #ecf0f1;
+    text-align: left; /* 深色模式下其他用戶內容也靠左 */
 }
 body.dark-mode .message-right {
     background: #27ae60; /* 深色绿色 */
     color: #ecf0f1;
+    text-align: right; /* 深色模式下自身用戶內容也靠右 */
 }
 
 /* 深色模式下的语音气泡尾巴 */
