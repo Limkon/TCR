@@ -138,7 +138,7 @@ footer #image-button:hover:not(:disabled) {
 .message-left, .message-right {
     padding: 10px 15px;
     margin: 15px 0; /* 增加垂直間距以容納尾巴 */
-    border-radius: 12px;
+    border-radius: 12px; /* 整體圓角 */
     max-width: 65%; /* 聊天框的最大寬度上限 */
     width: -webkit-fit-content; /* 讓寬度適應內容 (Chrome/Safari) */
     width: -moz-fit-content;    /* 讓寬度適應內容 (Firefox) */
@@ -154,7 +154,7 @@ footer #image-button:hover:not(:disabled) {
     text-align: left; /* 其他用戶的內容靠左對齊 */
     margin-right: auto; /* 推到左邊 */
     margin-left: 50px; /* 為左側用戶名留出空間 */
-    border-bottom-left-radius: 12px; /* 調整圓角以匹配尾巴 */
+    border-bottom-left-radius: 0px; /* 使左下角變直角以連接尾巴 */
 }
 
 .message-right {
@@ -163,7 +163,7 @@ footer #image-button:hover:not(:disabled) {
     text-align: right; /* 自身用戶的內容靠右對齊 */
     margin-left: auto; /* 推到右邊 */
     margin-right: 50px; /* 為右側用戶名留出空間 */
-    border-bottom-right-radius: 12px; /* 調整圓角以匹配尾巴 */
+    border-bottom-right-radius: 0px; /* 使右下角變直角以連接尾巴 */
 }
 
 /* 語音氣泡尾巴 */
@@ -308,11 +308,13 @@ body.dark-mode .message-left {
     background: #2c3e50; /* 深色蓝灰色 */
     color: #ecf0f1;
     text-align: left;
+    border-bottom-left-radius: 0px; /* 同樣，深色模式下也使左下角變直角 */
 }
 body.dark-mode .message-right {
     background: #27ae60; /* 深色绿色 */
     color: #ecf0f1;
     text-align: right;
+    border-bottom-right-radius: 0px; /* 同樣，深色模式下也使右下角變直角 */
 }
 
 /* 深色模式下的语音气泡尾巴 */
