@@ -139,7 +139,10 @@ footer #image-button:hover:not(:disabled) {
     padding: 10px 15px;
     margin: 15px 0; /* 增加垂直間距以容納尾巴 */
     border-radius: 12px;
-    max-width: 65%; /* 減小聊天框的最大寬度 */
+    max-width: 65%; /* 聊天框的最大寬度上限 */
+    width: -webkit-fit-content; /* 讓寬度適應內容 (Chrome/Safari) */
+    width: -moz-fit-content;    /* 讓寬度適應內容 (Firefox) */
+    width: fit-content;         /* 讓寬度適應內容 (標準) */
     word-wrap: break-word; /* 確保長單詞換行 */
     line-height: 1.4;
     position: relative; /* 為偽元素定位 */
