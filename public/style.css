@@ -2,6 +2,7 @@
 body {
     margin: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 #app {
@@ -13,14 +14,16 @@ body {
 header {
     background: #4CAF50;
     color: white;
-    padding: 10px;
+    padding: 10px 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 header h1 {
     margin: 0;
+    font-size: 1.5em;
 }
 
 .controls button {
@@ -31,6 +34,7 @@ header h1 {
     border: 1px solid #ccc;
     border-radius: 4px;
     cursor: pointer;
+    transition: background-color 0.2s;
 }
 
 .controls button:hover {
@@ -45,15 +49,17 @@ main {
 
 #chat {
     flex: 3;
-    padding: 10px;
+    padding: 15px;
     overflow-y: auto;
     background: #f9f9f9;
+    border-right: 1px solid #ddd;
 }
 
 #userlist {
     flex: 1;
-    padding: 10px;
-    border-left: 1px solid #ccc;
+    min-width: 180px; /* Minimum width for user list */
+    padding: 15px;
+    border-left: 1px solid #ccc; /* Kept for consistency, though #chat has border-right */
     overflow-y: auto;
     background: #fff;
 }
@@ -62,168 +68,289 @@ main {
     display: none;
 }
 
+#userlist h3 {
+    margin-top: 0;
+    color: #333;
+}
+#userlist div, #userlist p {
+    padding: 4px 0;
+    color: #555;
+}
+
+
 footer {
     display: flex;
-    padding: 10px;
+    padding: 10px 15px;
     background: #eee;
     align-items: center;
+    border-top: 1px solid #ddd;
+    gap: 10px; /* Spacing between footer items */
 }
 
 footer label {
-    margin-right: 10px;
+    margin-right: 5px; /* Reduced margin */
     font-size: 14px;
+    white-space: nowrap;
 }
 
 footer input[type="text"] {
     padding: 8px;
-    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
 
 footer #username {
-    width: 150px; /* 缩短用户名输入框 */
+    width: 150px;
 }
 
 footer #message {
-    flex: 1; /* 消息输入框占据剩余空间，相对延长 */
+    flex: 1; /* Message input takes remaining space */
 }
 
 footer button {
-    padding: 8px 16px;
+    padding: 8px 12px; /* Unified padding */
+    border: 1px solid #007bff;
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+footer button:hover {
+    background-color: #0056b3;
+}
+footer button:disabled {
+    background-color: #aaa;
+    border-color: #aaa;
+    cursor: not-allowed;
+}
+footer #image-button {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    padding: 8px 10px;
+}
+footer #image-button:hover:not(:disabled) {
+    background-color: #545b62;
 }
 
+
 /* 消息气泡 */
+.message-left, .message-right {
+    padding: 10px 15px;
+    margin: 8px 0;
+    border-radius: 12px;
+    max-width: 75%;
+    word-wrap: break-word; /* Ensure long words break */
+    line-height: 1.4;
+}
+
 .message-left {
     background: #e0f7fa;
     color: #333;
-    padding: 8px;
-    margin: 5px 0;
-    border-radius: 5px;
     text-align: left;
+    margin-right: auto; /* Pushes to left */
+    border-bottom-left-radius: 2px;
 }
 
 .message-right {
     background: #c8e6c9;
     color: #333;
-    padding: 8px;
-    margin: 5px 0;
-    border-radius: 5px;
-    text-align: right;
+    text-align: left; /* Text inside bubble still left, but bubble is right */
+    margin-left: auto; /* Pushes to right */
+    border-bottom-right-radius: 2px;
 }
+.message-right .message-username-display { /* If you want username to appear on right for self */
+    /* display: block; text-align: right; */ /* This would put only username on right, might look odd */
+}
+
+
+.message-username-display {
+    font-weight: bold;
+    color: #00796b; /* Or a color from your theme */
+    display: block; /* Username on its own line above message content */
+    margin-bottom: 4px;
+    font-size: 0.9em;
+}
+.message-right .message-username-display {
+    color: #387002;
+}
+
+
+.chat-image {
+    max-width: 100%; /* Relative to message bubble width */
+    max-height: 250px;
+    border-radius: 8px;
+    margin-top: 5px;
+    display: block; /* Ensure it respects margins */
+    cursor: pointer; /* Optional: for lightbox later */
+}
+
+.system-message {
+    font-style: italic;
+    color: #777;
+    text-align: center;
+    margin: 10px 0;
+    font-size: 0.9em;
+}
+
 
 /* 深色模式 */
 body.dark-mode {
     background: #121212;
     color: #e0e0e0;
 }
-
 body.dark-mode header {
-    background: #333;
-}
-
-body.dark-mode .controls button {
-    background: #444;
-    color: #e0e0e0;
-    border-color: #555;
-}
-
-body.dark-mode .controls button:hover {
-    background: #555;
-}
-
-body.dark-mode #chat {
     background: #1e1e1e;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
-
-body.dark-mode #userlist {
-    background: #2c2c2c;
-}
-
-body.dark-mode footer {
+body.dark-mode .controls button {
     background: #333;
+    color: #e0e0e0;
+    border-color: #444;
+}
+body.dark-mode .controls button:hover {
+    background: #444;
+}
+body.dark-mode #chat {
+    background: #1a1a1a;
+    border-right-color: #2c2c2c;
+}
+body.dark-mode #userlist {
+    background: #1e1e1e;
+    border-left-color: #2c2c2c;
+}
+body.dark-mode #userlist h3, body.dark-mode #userlist div, body.dark-mode #userlist p {
+    color: #ccc;
+}
+body.dark-mode footer {
+    background: #1e1e1e;
+    border-top-color: #2c2c2c;
+}
+body.dark-mode footer input[type="text"] {
+    background-color: #2c2c2c;
+    border-color: #444;
+    color: #e0e0e0;
+}
+body.dark-mode footer button {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+body.dark-mode footer button:hover:not(:disabled) {
+    background-color: #004085;
+}
+body.dark-mode footer button:disabled {
+    background-color: #444;
+    border-color: #444;
+}
+body.dark-mode footer #image-button {
+    background-color: #4a4a4a;
+    border-color: #4a4a4a;
+}
+body.dark-mode footer #image-button:hover:not(:disabled) {
+    background-color: #383838;
 }
 
 body.dark-mode .message-left {
-    background: #4a636e;
-    color: #f0f0f0;
+    background: #2c3e50; /* Darker blue-grey */
+    color: #ecf0f1;
+}
+body.dark-mode .message-right {
+    background: #27ae60; /* Darker green */
+    color: #ecf0f1;
+}
+body.dark-mode .message-username-display {
+    color: #bdc3c7;
+}
+body.dark-mode .message-right .message-username-display {
+    color: #a6e22e; /* Brighter for dark green */
 }
 
-body.dark-mode .message-right {
-    background: #4a704a;
-    color: #f0f0f0;
+body.dark-mode .system-message {
+    color: #aaa;
 }
 
 /* 移动端适配 */
-@media (max-width: 600px) {
-    footer {
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-    footer label {
-        width: 100%;
-        margin-right: 0;
-        text-align: left;
-    }
-
-    footer #username {
-        width: 100%;
-        max-width: 200px;
-    }
-
-    footer #message {
-        width: 100%;
-        flex: none;
-    }
-
-    footer button {
-        padding: 8px 12px;
-        width: auto;
-    }
-
-    footer #join,
-    footer #send {
-        flex: 1;
-        min-width: 80px;
-    }
-
+@media (max-width: 768px) { /* Wider breakpoint for better user list toggle */
     main {
         flex-direction: column;
     }
-
     #chat {
-        flex: none;
-        height: 50%;
+        flex: 1; /* Take available vertical space */
+        height: 60vh; /* Example height */
+        border-right: none;
     }
-
     #userlist {
-        flex: none;
-        height: 50%;
+        flex: 1; /* Take available vertical space */
+        height: 30vh; /* Example height */
         border-left: none;
         border-top: 1px solid #ccc;
     }
+    body.dark-mode #userlist {
+        border-top-color: #2c2c2c;
+    }
+    #userlist.hidden { /* Ensure hidden still works on mobile if toggled */
+        display: none !important; 
+    }
 }
 
-/* 销毁房间按钮 */
+@media (max-width: 600px) {
+    header h1 {
+        font-size: 1.2em;
+    }
+    .controls button {
+        padding: 5px 8px;
+        font-size: 0.9em;
+    }
+    footer {
+        flex-wrap: wrap; /* Allow items to wrap */
+        gap: 8px;
+    }
+    footer label#username-label { /* Ensure label is full width when username input wraps */
+        width: 100%;
+        margin-right: 0;
+        text-align: left;
+        margin-bottom: -5px; /* Adjust spacing if needed */
+    }
+    footer #username {
+        width: calc(70% - 8px); /* Username input takes a portion */
+    }
+    footer #join {
+        width: calc(30% - 8px); /* Join button next to it */
+    }
+    footer #message {
+        width: calc(100% - 58px - 58px - 16px); /* Message input takes most width */
+        order: 1; /* Ensure message input is on its own line if wrapped */
+    }
+     footer #image-button, footer #send {
+        padding: 8px;
+        min-width: 45px;
+        order: 2;
+    }
+     /* If you prefer message input to be full width on new line */
+    footer #message.full-width-mobile {
+        width: 100%;
+        margin-bottom: 8px; /* Space before buttons if they wrap below */
+    }
+    /* You might need to add the class "full-width-mobile" via JS based on state or keep simpler flex */
+}
+
+/* Styles for the old destroy room button (not implemented in HTML but kept for reference) */
 .controls .destroy-room {
     margin-left: 10px;
     padding: 6px 12px;
-    background: #fff;
-    color: #333;
-    border: 1px solid #ccc;
+    background: #dc3545; /* Red for destructive action */
+    color: white;
+    border: 1px solid #dc3545;
     border-radius: 4px;
     cursor: pointer;
 }
-
 .controls .destroy-room:hover {
-    background: #f0f0f0;
+    background: #c82333;
 }
-
 body.dark-mode .controls .destroy-room {
-    background: #444;
-    color: #e0e0e0;
-    border-color: #555;
+    background: #c82333;
+    border-color: #c82333;
 }
-
 body.dark-mode .controls .destroy-room:hover {
-    background: #555;
+    background: #a71d2a;
 }
