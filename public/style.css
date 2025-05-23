@@ -139,7 +139,7 @@ footer #image-button:hover:not(:disabled) {
     padding: 10px 15px;
     margin: 15px 0; /* 增加垂直間距以容納尾巴 */
     border-radius: 12px;
-    max-width: 75%;
+    max-width: 65%; /* 減小聊天框的最大寬度 */
     word-wrap: break-word; /* 確保長單詞換行 */
     line-height: 1.4;
     position: relative; /* 為偽元素定位 */
@@ -199,6 +199,7 @@ footer #image-button:hover:not(:disabled) {
 }
 .message-right .message-username-display {
     color: #387002; /* 自己消息的用户名的颜色 */
+    text-align: right; /* 將自己消息的用戶名靠右對齊 */
 }
 
 
@@ -300,6 +301,7 @@ body.dark-mode .message-username-display {
 }
 body.dark-mode .message-right .message-username-display {
     color: #a6e22e; /* 深色绿上的亮色 */
+    text-align: right; /* 同樣，深色模式下也將自己消息的用戶名靠右對齊 */
 }
 
 body.dark-mode .system-message {
@@ -327,6 +329,10 @@ body.dark-mode .system-message {
     }
     #userlist.hidden { /* 确保在移动设备上切换时隐藏仍然有效 */
         display: none !important;
+    }
+    /* 在移動設備上，讓聊天框更寬一些 */
+    .message-left, .message-right {
+        max-width: 85%;
     }
 }
 
@@ -362,6 +368,10 @@ body.dark-mode .system-message {
         padding: 8px;
         min-width: 45px;
         order: 2;
+    }
+    /* 在更小的移動設備上，讓聊天框更寬一些 */
+    .message-left, .message-right {
+        max-width: 90%;
     }
 }
 
