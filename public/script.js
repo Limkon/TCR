@@ -1,9 +1,9 @@
 let ws;
 let username = '';
 let joined = false;
-let currentRoomId = ''; // Store current room ID globally on client
+let currentRoomId = ''; // 在客戶端全域儲存目前房間 ID
 
-// Cache DOM elements
+// 快取 DOM 元素
 const chatArea = document.getElementById('chat');
 const userListArea = document.getElementById('userlist');
 const usernameInput = document.getElementById('username');
@@ -17,79 +17,79 @@ const themeToggleButton = document.getElementById('theme-toggle');
 const userListToggleButton = document.getElementById('userlist-toggle');
 
 
-// 连接 WebSocket
+// 連接 WebSocket
 function connect() {
     currentRoomId = location.pathname.split('/')[1] || 'default';
-    // Ensure WebSocket connection uses wss for HTTPS or ws for HTTP
+    // 確保 WebSocket 連接對 HTTPS 使用 wss，對 HTTP 使用 ws
     const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
     ws = new WebSocket(`${protocol}//${location.host}/${currentRoomId}`);
 
     ws.onopen = () => {
-        console.log(`成功连接到房间: ${currentRoomId}`);
+        console.log(`成功連接到房間: ${currentRoomId}`);
     };
 
     ws.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data);
-            console.log('收到消息:', data);
+            console.log('收到訊息:', data);
             switch (data.type) {
                 case 'userList':
-                    console.log('更新用户列表:', data.users);
+                    console.log('更新使用者列表:', data.users);
                     updateUserList(data.users);
-                    // Fallback join confirmation
+                    // 後備加入確認
                     if (!joined && username && data.users.includes(username)) {
-                        console.log('通过 userList 确认加入成功 (fallback)，启用消息输入框');
+                        console.log('透過 userList 確認加入成功 (fallback)，啟用訊息輸入框');
                         setJoinedState(true);
                     }
                     break;
                 case 'message':
-                    console.log('收到聊天消息:', data.message);
+                    console.log('收到聊天訊息:', data.message);
                     addMessage(data.username, data.message, 'text');
                     break;
                 case 'image':
-                    console.log(`收到来自 ${data.username} 的图片`);
+                    console.log(`收到來自 ${data.username} 的圖片`);
                     addMessage(data.username, data.imageData, 'image');
                     break;
                 case 'joinSuccess':
-                    console.log('收到 joinSuccess，启用消息输入框');
+                    console.log('收到 joinSuccess，啟用訊息輸入框');
                     setJoinedState(true);
                     break;
                 case 'joinError':
-                    console.log('加入失败:', data.message);
-                    alert(data.message || '用户名已存在，请重新输入');
-                    setJoinedState(false); // Reset state
-                    usernameInput.value = ''; // Clear input
-                    username = ''; // Clear stored username
+                    console.log('加入失敗:', data.message);
+                    alert(data.message || '使用者名稱已存在，請重新輸入');
+                    setJoinedState(false); // 重設狀態
+                    usernameInput.value = ''; // 清除輸入
+                    username = ''; // 清除儲存的使用者名稱
                     break;
                 case 'clearChat':
-                    console.log(`清理聊天记录: ${currentRoomId}`);
-                    clearChatWithTip(currentRoomId, data.message || `已清理房间 ${currentRoomId} 的聊天记录`);
+                    console.log(`清理聊天記錄: ${currentRoomId}`);
+                    clearChatWithTip(currentRoomId, data.message || `已清理房間 ${currentRoomId} 的聊天記錄`);
                     break;
-                case 'error': // Generic error from server
-                    console.error('服务器错误:', data.message);
-                    alert(`服务器错误: ${data.message}`);
+                case 'error': // 來自伺服器的通用錯誤
+                    console.error('伺服器錯誤:', data.message);
+                    alert(`伺服器錯誤: ${data.message}`);
                     break;
                 default:
-                    console.warn('未知消息类型:', data);
+                    console.warn('未知訊息類型:', data);
                     break;
             }
         } catch (error) {
-            console.error('消息解析失败:', error, '原始数据:', event.data);
+            console.error('訊息解析失敗:', error, '原始資料:', event.data);
         }
     };
 
     ws.onclose = () => {
-        console.log('连接关闭');
-        addSystemMessage(`已从房间 ${currentRoomId} 断开连接。请重新加入。`);
+        console.log('連接關閉');
+        addSystemMessage(`已從房間 ${currentRoomId} 斷開連接。請重新加入。`);
         setJoinedState(false);
-        updateUserList([]); // Clear user list on disconnect
-        // Optionally, try to reconnect after a delay
-        // setTimeout(connect, 5000); // Reconnect after 5 seconds
+        updateUserList([]); // 斷線時清除使用者列表
+        // 可選：延遲後嘗試重新連接
+        // setTimeout(connect, 5000); // 5 秒後重新連接
     };
 
     ws.onerror = (error) => {
-        console.error('WebSocket 错误:', error);
-        addSystemMessage('连接发生错误，请刷新页面或稍后再试。');
+        console.error('WebSocket 錯誤:', error);
+        addSystemMessage('連接發生錯誤，請刷新頁面或稍後再試。');
         setJoinedState(false);
     };
 }
@@ -105,7 +105,7 @@ function setJoinedState(isJoined) {
     joinButton.style.display = isJoined ? 'none' : 'block';
 
     if (!isJoined) {
-        usernameInput.value = username; // Keep username in input if join failed or disconnected
+        usernameInput.value = username; // 如果加入失敗或斷線，則在輸入框中保留使用者名稱
     }
 }
 
@@ -113,7 +113,7 @@ function setJoinedState(isJoined) {
 joinButton.onclick = () => {
     const name = usernameInput.value.trim();
     if (!name) {
-        alert('请输入用户名');
+        alert('請輸入使用者名稱');
         return;
     }
     if (joined) {
@@ -121,120 +121,125 @@ joinButton.onclick = () => {
         return;
     }
     if (!ws || ws.readyState !== WebSocket.OPEN) {
-        alert('尚未连接到服务器，请稍候或刷新。');
-        console.log('尝试加入，但WebSocket未连接或未打开。');
-        connect(); // Attempt to connect if not already
+        alert('尚未連接到伺服器，請稍候或刷新。');
+        console.log('嘗試加入，但WebSocket未連接或未打開。');
+        connect(); // 如果尚未連接，則嘗試連接
         return;
     }
-    console.log('尝试加入，用户名:', name);
-    username = name; // Set username before sending join message
+    console.log('嘗試加入，使用者名稱:', name);
+    username = name; // 在傳送加入訊息前設定使用者名稱
     ws.send(JSON.stringify({ type: 'join', username }));
-    // Temporarily disable join UI, will be re-enabled on joinError or enabled chat on joinSuccess
+    // 暫時停用加入 UI，將在 joinError 時重新啟用或在 joinSuccess 時啟用聊天
     usernameLabel.style.display = 'none';
     usernameInput.style.display = 'none';
     joinButton.style.display = 'none';
 };
 
-// 发送消息
+// 發送訊息
 sendButton.onclick = () => {
     const msg = messageInput.value.trim();
     if (!msg) return;
     if (!joined || !ws || ws.readyState !== WebSocket.OPEN) {
-        alert('尚未加入聊天或连接已断开。');
+        alert('尚未加入聊天或連接已斷開。');
         return;
     }
     ws.send(JSON.stringify({ type: 'message', message: msg }));
     messageInput.value = '';
 };
 
-// 回车键快捷发送
+// Enter 鍵快捷發送
 messageInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) { // Send on Enter, allow Shift+Enter for newline
-        e.preventDefault(); // Prevent default Enter behavior (like newline in some cases)
+    if (e.key === 'Enter' && !e.shiftKey) { // 按 Enter 發送，允許 Shift+Enter 換行
+        e.preventDefault(); // 防止預設 Enter 行為 (例如在某些情況下換行)
         sendButton.click();
     }
 });
 
-// 图片按钮点击
+// 圖片按鈕點擊
 imageButton.onclick = () => {
     if (!joined || !ws || ws.readyState !== WebSocket.OPEN) {
-        alert('尚未加入聊天或连接已断开。');
+        alert('尚未加入聊天或連接已斷開。');
         return;
     }
-    imageInput.click(); // Trigger hidden file input
+    imageInput.click(); // 觸發隱藏的檔案輸入
 };
 
-// 处理图片选择
+// 處理圖片選擇
 imageInput.onchange = (event) => {
     const file = event.target.files[0];
     if (file) {
-        if (file.size > 2 * 1024 * 1024) { // 2MB limit
-            alert('图片文件过大，请选择小于2MB的图片。');
-            imageInput.value = ''; // Clear the input
+        if (file.size > 2 * 1024 * 1024) { // 2MB 限制
+            alert('圖片檔案過大，請選擇小於2MB的圖片。');
+            imageInput.value = ''; // 清除輸入
             return;
         }
         const reader = new FileReader();
         reader.onload = (e) => {
-            const imageData = e.target.result; // Base64 string
+            const imageData = e.target.result; // Base64 字串
             if (joined && ws && ws.readyState === WebSocket.OPEN) {
                 ws.send(JSON.stringify({ type: 'image', username: username, imageData: imageData }));
             } else {
-                 alert('无法发送图片：未连接或未加入聊天。');
+                 alert('無法傳送圖片：未連接或未加入聊天。');
             }
         };
         reader.onerror = (error) => {
             console.error('FileReader error:', error);
-            alert('读取文件失败。');
+            alert('讀取檔案失敗。');
         };
         reader.readAsDataURL(file);
-        imageInput.value = ''; // Clear the input to allow selecting the same file again
+        imageInput.value = ''; // 清除輸入以允許再次選擇相同的檔案
     }
 };
 
 
-// 主题切换
+// 主題切換
 themeToggleButton.onclick = () => {
     document.body.classList.toggle('dark-mode');
     document.body.classList.toggle('light-mode');
-    // Optionally, save theme preference to localStorage
+    // 可選：將主題偏好儲存到 localStorage
     // localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
 };
 
-// 用户列表显示切换
+// 使用者列表顯示切換
 userListToggleButton.onclick = () => {
     userListArea.classList.toggle('hidden');
 };
 
-// 添加聊天消息到DOM
+// 將聊天訊息新增到 DOM
 function addMessage(user, data, type = 'text') {
     const messageContainer = document.createElement('div');
     messageContainer.className = user === username ? 'message-right' : 'message-left';
 
     const usernameSpan = document.createElement('span');
     usernameSpan.className = 'message-username-display';
-    usernameSpan.textContent = user + ": ";
+    usernameSpan.textContent = user; // 修改此處：移除冒號和空格
     messageContainer.appendChild(usernameSpan);
+
+    // 創建一個新的 div 來容納訊息內容（文字或圖片）
+    // 這樣可以讓用戶名和內容在 CSS 中更容易分開控制對齊
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'message-content'; // 給內容 div 一個 class
 
     if (type === 'text') {
         const textNode = document.createTextNode(data);
-        messageContainer.appendChild(textNode);
+        contentDiv.appendChild(textNode);
     } else if (type === 'image') {
-        // For images, data is the base64 string
-        messageContainer.appendChild(document.createElement('br'));
+        // 對於圖片，data 是 base64 字串
         const img = document.createElement('img');
         img.src = data;
-        img.alt = `来自 ${user} 的图片`;
+        img.alt = `來自 ${user} 的圖片`;
         img.className = 'chat-image';
-        messageContainer.appendChild(img);
+        contentDiv.appendChild(img);
     }
+    messageContainer.appendChild(contentDiv); // 將內容 div 加入到 messageContainer
 
     chatArea.appendChild(messageContainer);
-    chatArea.scrollTop = chatArea.scrollHeight; // Auto-scroll to bottom
+    chatArea.scrollTop = chatArea.scrollHeight; // 自動捲動到底部
 }
 
-// 更新在线用户列表
+// 更新在線使用者列表
 function updateUserList(users) {
-    userListArea.innerHTML = '<h3>在线用户</h3>';
+    userListArea.innerHTML = '<h3>在線用戶</h3>';
     if (users && users.length > 0) {
         users.filter(user => user !== null).forEach(user => {
             const div = document.createElement('div');
@@ -243,28 +248,28 @@ function updateUserList(users) {
         });
     } else {
         const p = document.createElement('p');
-        p.textContent = '当前无其他用户在线。';
+        p.textContent = '目前無其他用戶在線。';
         userListArea.appendChild(p);
     }
 }
 
-// 清空聊天并提示
+// 清空聊天並提示
 function clearChatWithTip(roomId, tipMessage) {
-    chatArea.innerHTML = ''; // Clear all messages
-    addSystemMessage(tipMessage || `系统提示：已清理房间 ${roomId} 的聊天记录`);
+    chatArea.innerHTML = ''; // 清除所有訊息
+    addSystemMessage(tipMessage || `系統提示：已清理房間 ${roomId} 的聊天記錄`);
 }
 
-// Add a system message to the chat
+// 將系統訊息新增到聊天中
 function addSystemMessage(message) {
     const tip = document.createElement('div');
-    tip.className = 'system-message'; // Use a general class for system messages
+    tip.className = 'system-message'; // 對系統訊息使用通用 class
     tip.textContent = message;
     chatArea.appendChild(tip);
     chatArea.scrollTop = chatArea.scrollHeight;
 }
 
 
-// Initialize: Load theme preference if any
+// 初始化：如果有的話，載入主題偏好
 // document.addEventListener('DOMContentLoaded', () => {
 //     const savedTheme = localStorage.getItem('theme');
 //     if (savedTheme === 'dark') {
@@ -273,4 +278,4 @@ function addSystemMessage(message) {
 //     }
 // });
 
-connect(); // Initial connection
+connect(); // 初始連接
