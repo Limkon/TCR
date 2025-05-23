@@ -49,7 +49,7 @@ main {
 
 #chat {
     flex: 3;
-    padding: 15px;
+    padding: 15px; /* 為外部用戶名保留一些空間，如果用戶名很長，可能需要調整 */
     overflow-y: auto;
     background: #f9f9f9;
     border-right: 1px solid #ddd;
@@ -145,7 +145,7 @@ footer #image-button:hover:not(:disabled) {
     width: fit-content;         /* 讓寬度適應內容 (標準) */
     word-wrap: break-word; /* 確保長單詞換行 */
     line-height: 1.4;
-    position: relative; /* 為偽元素定位 */
+    position: relative; /* 為偽元素及用戶名定位 */
 }
 
 .message-left {
@@ -153,6 +153,7 @@ footer #image-button:hover:not(:disabled) {
     color: #333;
     text-align: left; /* 其他用戶的內容靠左對齊 */
     margin-right: auto; /* 推到左邊 */
+    margin-left: 50px; /* 為左側用戶名留出空間 */
     border-bottom-left-radius: 12px; /* 調整圓角以匹配尾巴 */
 }
 
@@ -161,6 +162,7 @@ footer #image-button:hover:not(:disabled) {
     color: #333;
     text-align: right; /* 自身用戶的內容靠右對齊 */
     margin-left: auto; /* 推到右邊 */
+    margin-right: 50px; /* 為右側用戶名留出空間 */
     border-bottom-right-radius: 12px; /* 調整圓角以匹配尾巴 */
 }
 
@@ -194,15 +196,23 @@ footer #image-button:hover:not(:disabled) {
 }
 
 .message-username-display {
-    font-weight: bold;
-    color: #00796b; /* 或主题中的颜色 */
-    display: block; /* 用户名在消息内容上方单独一行 */
-    margin-bottom: 4px;
-    font-size: 0.9em;
+    position: absolute;
+    bottom: 0px;       /* 與氣泡尾巴底部大致對齊 */
+    font-size: 0.8em;   /* 使字型略小於訊息內文 */
+    /* font-weight: bold; 被移除，根據圖片效果 */
+    white-space: nowrap; /* 防止用戶名換行 */
+    padding: 0 2px;      /* 微調內邊距 */
+    line-height: 1;      /* 調整行高以更好地垂直對齊 */
 }
+
 .message-right .message-username-display {
-    color: #387002; /* 自己消息的用户名的颜色 */
-    text-align: right; /* 將自己消息的用戶名靠右對齊 */
+    left: calc(100% + 12px); /* 定位到氣泡右側，尾巴寬度約10-12px，再加一點間隙 */
+    color: #387002;
+}
+
+.message-left .message-username-display {
+    right: calc(100% + 12px); /* 定位到氣泡左側，尾巴寬度約10-12px，再加一點間隙 */
+    color: #00796b;
 }
 
 
@@ -219,13 +229,13 @@ footer #image-button:hover:not(:disabled) {
 /* 自身用戶發送的圖片靠右對齊 */
 .message-right .chat-image {
     margin-left: auto;
-    margin-right: 0; /* 或者省略 margin-right: 0 也可以 */
+    margin-right: 0;
 }
 
-/* 其他用戶發送的圖片（默認靠左，如果需要明確可以添加） */
+/* 其他用戶發送的圖片（默認靠左） */
 .message-left .chat-image {
     margin-right: auto;
-    margin-left: 0; /* 或者省略 margin-left: 0 也可以 */
+    margin-left: 0;
 }
 
 
@@ -297,29 +307,28 @@ body.dark-mode footer #image-button:hover:not(:disabled) {
 body.dark-mode .message-left {
     background: #2c3e50; /* 深色蓝灰色 */
     color: #ecf0f1;
-    text-align: left; /* 深色模式下其他用戶內容也靠左 */
+    text-align: left;
 }
 body.dark-mode .message-right {
     background: #27ae60; /* 深色绿色 */
     color: #ecf0f1;
-    text-align: right; /* 深色模式下自身用戶內容也靠右 */
+    text-align: right;
 }
 
 /* 深色模式下的语音气泡尾巴 */
 body.dark-mode .message-left::after {
-    border-right-color: #2c3e50; /* 匹配深色模式气泡颜色 */
+    border-right-color: #2c3e50;
 }
 body.dark-mode .message-right::after {
-    border-left-color: #27ae60; /* 匹配深色模式气泡颜色 */
+    border-left-color: #27ae60;
 }
 
 
-body.dark-mode .message-username-display {
-    color: #bdc3c7;
-}
 body.dark-mode .message-right .message-username-display {
     color: #a6e22e; /* 深色绿上的亮色 */
-    text-align: right; /* 同樣，深色模式下也將自己消息的用戶名靠右對齊 */
+}
+body.dark-mode .message-left .message-username-display {
+    color: #bdc3c7; /* 深色模式下其他用戶的用戶名顏色 */
 }
 
 body.dark-mode .system-message {
@@ -327,30 +336,37 @@ body.dark-mode .system-message {
 }
 
 /* 移动端适配 */
-@media (max-width: 768px) { /* 更宽的断点以便更好地切换用户列表 */
+@media (max-width: 768px) {
     main {
         flex-direction: column;
     }
     #chat {
-        flex: 1; /* 占据可用垂直空间 */
-        height: 60vh; /* 示例高度 */
+        flex: 1;
+        height: 60vh;
         border-right: none;
     }
     #userlist {
-        flex: 1; /* 占据可用垂直空间 */
-        height: 30vh; /* 示例高度 */
+        flex: 1;
+        height: 30vh;
         border-left: none;
         border-top: 1px solid #ccc;
     }
     body.dark-mode #userlist {
         border-top-color: #2c2c2c;
     }
-    #userlist.hidden { /* 确保在移动设备上切换时隐藏仍然有效 */
+    #userlist.hidden {
         display: none !important;
     }
-    /* 在移動設備上，讓聊天框更寬一些 */
     .message-left, .message-right {
         max-width: 85%;
+        margin-left: 35px; /* 移動端調整用戶名空間 */
+        margin-right: 35px;
+    }
+    .message-right .message-username-display {
+      left: calc(100% + 8px);
+    }
+    .message-left .message-username-display {
+      right: calc(100% + 8px);
     }
 }
 
@@ -363,33 +379,34 @@ body.dark-mode .system-message {
         font-size: 0.9em;
     }
     footer {
-        flex-wrap: wrap; /* 允许项目换行 */
+        flex-wrap: wrap;
         gap: 8px;
     }
-    footer label#username-label { /* 确保当用户名输入框换行时标签占满宽度 */
+    footer label#username-label {
         width: 100%;
         margin-right: 0;
         text-align: left;
-        margin-bottom: -5px; /* 如果需要，调整间距 */
+        margin-bottom: -5px;
     }
     footer #username {
-        width: calc(70% - 8px); /* 用户名输入框占据一部分 */
+        width: calc(70% - 8px);
     }
     footer #join {
-        width: calc(30% - 8px); /* 加入按钮在其旁边 */
+        width: calc(30% - 8px);
     }
     footer #message {
-        width: calc(100% - 58px - 58px - 16px); /* 消息输入框占据大部分宽度 */
-        order: 1; /* 如果换行，确保消息输入框在单独一行 */
+        width: calc(100% - 58px - 58px - 16px);
+        order: 1;
     }
      footer #image-button, footer #send {
         padding: 8px;
         min-width: 45px;
         order: 2;
     }
-    /* 在更小的移動設備上，讓聊天框更寬一些 */
     .message-left, .message-right {
         max-width: 90%;
+        margin-left: 30px; /* 更小移動端調整用戶名空間 */
+        margin-right: 30px;
     }
 }
 
@@ -397,7 +414,7 @@ body.dark-mode .system-message {
 .controls .destroy-room {
     margin-left: 10px;
     padding: 6px 12px;
-    background: #dc3545; /* 红色表示破坏性操作 */
+    background: #dc3545;
     color: white;
     border: 1px solid #dc3545;
     border-radius: 4px;
