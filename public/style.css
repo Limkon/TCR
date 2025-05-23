@@ -57,9 +57,9 @@ main {
 
 #userlist {
     flex: 1;
-    min-width: 180px; /* Minimum width for user list */
+    min-width: 180px; /* 用户列表最小宽度 */
     padding: 15px;
-    border-left: 1px solid #ccc; /* Kept for consistency, though #chat has border-right */
+    border-left: 1px solid #ccc;
     overflow-y: auto;
     background: #fff;
 }
@@ -84,11 +84,11 @@ footer {
     background: #eee;
     align-items: center;
     border-top: 1px solid #ddd;
-    gap: 10px; /* Spacing between footer items */
+    gap: 10px; /* 页脚项目之间的间距 */
 }
 
 footer label {
-    margin-right: 5px; /* Reduced margin */
+    margin-right: 5px; /* 减小边距 */
     font-size: 14px;
     white-space: nowrap;
 }
@@ -104,11 +104,11 @@ footer #username {
 }
 
 footer #message {
-    flex: 1; /* Message input takes remaining space */
+    flex: 1; /* 消息输入框占据剩余空间 */
 }
 
 footer button {
-    padding: 8px 12px; /* Unified padding */
+    padding: 8px 12px; /* 统一内边距 */
     border: 1px solid #007bff;
     background-color: #007bff;
     color: white;
@@ -137,52 +137,78 @@ footer #image-button:hover:not(:disabled) {
 /* 消息气泡 */
 .message-left, .message-right {
     padding: 10px 15px;
-    margin: 8px 0;
+    margin: 15px 0; /* 增加垂直间距以容纳尾巴 */
     border-radius: 12px;
     max-width: 75%;
-    word-wrap: break-word; /* Ensure long words break */
+    word-wrap: break-word; /* 确保长单词换行 */
     line-height: 1.4;
+    position: relative; /* 为伪元素定位 */
 }
 
 .message-left {
-    background: #e0f7fa;
+    background: #e0f7fa; /* 接收消息的浅蓝色 */
     color: #333;
     text-align: left;
-    margin-right: auto; /* Pushes to left */
-    border-bottom-left-radius: 2px;
+    margin-right: auto; /* 推到左边 */
+    border-bottom-left-radius: 12px; /* 调整圆角以匹配尾巴 */
 }
 
 .message-right {
-    background: #c8e6c9;
+    background: #c8e6c9; /* 发送消息的浅绿色 */
     color: #333;
-    text-align: left; /* Text inside bubble still left, but bubble is right */
-    margin-left: auto; /* Pushes to right */
-    border-bottom-right-radius: 2px;
-}
-.message-right .message-username-display { /* If you want username to appear on right for self */
-    /* display: block; text-align: right; */ /* This would put only username on right, might look odd */
+    text-align: left; /* 气泡内的文本仍然左对齐，但气泡在右边 */
+    margin-left: auto; /* 推到右边 */
+    border-bottom-right-radius: 12px; /* 调整圆角以匹配尾巴 */
 }
 
+/* 语音气泡尾巴 */
+.message-left::after {
+    content: '';
+    position: absolute;
+    bottom: 0px; /* 调整以使其与气泡底部对齐 */
+    left: -10px; /* 尾巴在气泡外部 */
+    width: 0;
+    height: 0;
+    border: 12px solid transparent; /* 增加尾巴大小 */
+    border-right-color: #e0f7fa; /* 匹配气泡颜色 */
+    border-left: 0;
+    border-bottom: 0; /* 调整边框以形成朝左的尾巴 */
+    margin-top: -6px; /* 垂直居中尾巴 */
+}
+
+.message-right::after {
+    content: '';
+    position: absolute;
+    bottom: 0px; /* 调整以使其与气泡底部对齐 */
+    right: -10px; /* 尾巴在气泡外部 */
+    width: 0;
+    height: 0;
+    border: 12px solid transparent; /* 增加尾巴大小 */
+    border-left-color: #c8e6c9; /* 匹配气泡颜色 */
+    border-right: 0;
+    border-bottom: 0; /* 调整边框以形成朝右的尾巴 */
+    margin-top: -6px; /* 垂直居中尾巴 */
+}
 
 .message-username-display {
     font-weight: bold;
-    color: #00796b; /* Or a color from your theme */
-    display: block; /* Username on its own line above message content */
+    color: #00796b; /* 或主题中的颜色 */
+    display: block; /* 用户名在消息内容上方单独一行 */
     margin-bottom: 4px;
     font-size: 0.9em;
 }
 .message-right .message-username-display {
-    color: #387002;
+    color: #387002; /* 自己消息的用户名的颜色 */
 }
 
 
 .chat-image {
-    max-width: 100%; /* Relative to message bubble width */
+    max-width: 100%; /* 相对于消息气泡宽度 */
     max-height: 250px;
     border-radius: 8px;
     margin-top: 5px;
-    display: block; /* Ensure it respects margins */
-    cursor: pointer; /* Optional: for lightbox later */
+    display: block; /* 确保它遵守边距 */
+    cursor: pointer; /* 可选：以后用于灯箱效果 */
 }
 
 .system-message {
@@ -251,18 +277,28 @@ body.dark-mode footer #image-button:hover:not(:disabled) {
 }
 
 body.dark-mode .message-left {
-    background: #2c3e50; /* Darker blue-grey */
+    background: #2c3e50; /* 深色蓝灰色 */
     color: #ecf0f1;
 }
 body.dark-mode .message-right {
-    background: #27ae60; /* Darker green */
+    background: #27ae60; /* 深色绿色 */
     color: #ecf0f1;
 }
+
+/* 深色模式下的语音气泡尾巴 */
+body.dark-mode .message-left::after {
+    border-right-color: #2c3e50; /* 匹配深色模式气泡颜色 */
+}
+body.dark-mode .message-right::after {
+    border-left-color: #27ae60; /* 匹配深色模式气泡颜色 */
+}
+
+
 body.dark-mode .message-username-display {
     color: #bdc3c7;
 }
 body.dark-mode .message-right .message-username-display {
-    color: #a6e22e; /* Brighter for dark green */
+    color: #a6e22e; /* 深色绿上的亮色 */
 }
 
 body.dark-mode .system-message {
@@ -270,26 +306,26 @@ body.dark-mode .system-message {
 }
 
 /* 移动端适配 */
-@media (max-width: 768px) { /* Wider breakpoint for better user list toggle */
+@media (max-width: 768px) { /* 更宽的断点以便更好地切换用户列表 */
     main {
         flex-direction: column;
     }
     #chat {
-        flex: 1; /* Take available vertical space */
-        height: 60vh; /* Example height */
+        flex: 1; /* 占据可用垂直空间 */
+        height: 60vh; /* 示例高度 */
         border-right: none;
     }
     #userlist {
-        flex: 1; /* Take available vertical space */
-        height: 30vh; /* Example height */
+        flex: 1; /* 占据可用垂直空间 */
+        height: 30vh; /* 示例高度 */
         border-left: none;
         border-top: 1px solid #ccc;
     }
     body.dark-mode #userlist {
         border-top-color: #2c2c2c;
     }
-    #userlist.hidden { /* Ensure hidden still works on mobile if toggled */
-        display: none !important; 
+    #userlist.hidden { /* 确保在移动设备上切换时隐藏仍然有效 */
+        display: none !important;
     }
 }
 
@@ -302,43 +338,37 @@ body.dark-mode .system-message {
         font-size: 0.9em;
     }
     footer {
-        flex-wrap: wrap; /* Allow items to wrap */
+        flex-wrap: wrap; /* 允许项目换行 */
         gap: 8px;
     }
-    footer label#username-label { /* Ensure label is full width when username input wraps */
+    footer label#username-label { /* 确保当用户名输入框换行时标签占满宽度 */
         width: 100%;
         margin-right: 0;
         text-align: left;
-        margin-bottom: -5px; /* Adjust spacing if needed */
+        margin-bottom: -5px; /* 如果需要，调整间距 */
     }
     footer #username {
-        width: calc(70% - 8px); /* Username input takes a portion */
+        width: calc(70% - 8px); /* 用户名输入框占据一部分 */
     }
     footer #join {
-        width: calc(30% - 8px); /* Join button next to it */
+        width: calc(30% - 8px); /* 加入按钮在其旁边 */
     }
     footer #message {
-        width: calc(100% - 58px - 58px - 16px); /* Message input takes most width */
-        order: 1; /* Ensure message input is on its own line if wrapped */
+        width: calc(100% - 58px - 58px - 16px); /* 消息输入框占据大部分宽度 */
+        order: 1; /* 如果换行，确保消息输入框在单独一行 */
     }
      footer #image-button, footer #send {
         padding: 8px;
         min-width: 45px;
         order: 2;
     }
-     /* If you prefer message input to be full width on new line */
-    footer #message.full-width-mobile {
-        width: 100%;
-        margin-bottom: 8px; /* Space before buttons if they wrap below */
-    }
-    /* You might need to add the class "full-width-mobile" via JS based on state or keep simpler flex */
 }
 
-/* Styles for the old destroy room button (not implemented in HTML but kept for reference) */
+/* 旧的销毁房间按钮样式（未在HTML中实现，但保留以供参考） */
 .controls .destroy-room {
     margin-left: 10px;
     padding: 6px 12px;
-    background: #dc3545; /* Red for destructive action */
+    background: #dc3545; /* 红色表示破坏性操作 */
     color: white;
     border: 1px solid #dc3545;
     border-radius: 4px;
