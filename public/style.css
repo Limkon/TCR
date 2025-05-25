@@ -137,7 +137,8 @@ footer #image-button:hover:not(:disabled) {
 /* 訊息氣泡 */
 .message-left, .message-right {
     padding: 10px 15px;
-    margin: 15px 0; /* 增加垂直間距以容納尾巴 */
+    margin-top: 15px; /* 保持原有的上下間距 */
+    margin-bottom: 15px; /* 保持原有的上下間距 */
     border-radius: 12px; /* 整體圓角 */
     max-width: 65%; /* 聊天框的最大寬度上限 */
     width: -webkit-fit-content; /* 讓寬度適應內容 (Chrome/Safari) */
@@ -197,12 +198,11 @@ footer #image-button:hover:not(:disabled) {
 
 .message-username-display {
     position: absolute;
-    bottom: 0px;       /* 與氣泡尾巴底部大致對齊 */
+    bottom: 0px;      /* 與氣泡尾巴底部大致對齊 */
     font-size: 0.8em;   /* 使字型略小於訊息內文 */
-    /* font-weight: bold; 被移除，根據圖片效果 */
     white-space: nowrap; /* 防止用戶名換行 */
-    padding: 0 2px;      /* 微調內邊距 */
-    line-height: 1;      /* 調整行高以更好地垂直對齊 */
+    padding: 0 2px;     /* 微調內邊距 */
+    line-height: 1;     /* 調整行高以更好地垂直對齊 */
 }
 
 .message-right .message-username-display {
@@ -359,11 +359,20 @@ body.dark-mode .system-message {
     #userlist.hidden {
         display: none !important;
     }
-    .message-left, .message-right {
+
+    /* --- CORRECTED SECTION --- */
+    .message-left {
         max-width: 85%;
-        margin-left: 35px; /* 移動端調整用戶名空間 */
-        margin-right: 35px;
+        margin-left: 35px; /* 移動端調整左側用戶名空間 */
+        margin-right: auto; /* 確保靠左 */
     }
+    .message-right {
+        max-width: 85%;
+        margin-right: 35px; /* 移動端調整右側用戶名空間 */
+        margin-left: auto; /* 確保靠右 */
+    }
+    /* --- END CORRECTED SECTION --- */
+
     .message-right .message-username-display {
       left: calc(100% + 8px);
     }
@@ -397,19 +406,27 @@ body.dark-mode .system-message {
         width: calc(30% - 8px);
     }
     footer #message {
-        width: calc(100% - 58px - 58px - 16px);
+        width: calc(100% - 58px - 58px - 16px); /* Assuming image and send buttons are approx 58px wide */
         order: 1;
     }
-     footer #image-button, footer #send {
+      footer #image-button, footer #send {
         padding: 8px;
-        min-width: 45px;
+        min-width: 45px; /* Ensure buttons have a minimum width */
         order: 2;
     }
-    .message-left, .message-right {
+
+    /* --- CORRECTED SECTION --- */
+    .message-left {
         max-width: 90%;
-        margin-left: 30px; /* 更小移動端調整用戶名空間 */
-        margin-right: 30px;
+        margin-left: 30px; /* 更小移動端調整左側用戶名空間 */
+        margin-right: auto; /* 確保靠左 */
     }
+    .message-right {
+        max-width: 90%;
+        margin-right: 30px; /* 更小移動端調整右側用戶名空間 */
+        margin-left: auto; /* 確保靠右 */
+    }
+    /* --- END CORRECTED SECTION --- */
 }
 
 /* 旧的销毁房间按钮样式（未在HTML中实现，但保留以供参考） */
